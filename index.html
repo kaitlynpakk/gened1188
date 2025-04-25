@@ -1,0 +1,238 @@
+import React, { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  CalendarDays,
+  CheckCircle,
+  Flame,
+  Sun,
+  Moon,
+  Plus,
+  Trash,
+} from "lucide-react";
+
+const Dashboard = () => {
+  const [habits, setHabits] = useState([
+    { name: "Morning Walk", completed: false },
+    { name: "Read 10 Pages", completed: false },
+    { name: "No Social Media", completed: false },
+    { name: "Meditate 10 Min", completed: false },
+  ]);
+  const [newHabit, setNewHabit] = useState("");
+  const [showInput, setShowInput] = useState(false);
+  const [dateTime, setDateTime] = useState(new Date());
+  const [quote, setQuote] = useState({ text: "", author: "" });
+  const [streak, setStreak] = useState(0);
+  const [completedDates, setCompletedDates] = useState([]);
+
+  const quotes = [
+    { text: "Small habits make a big difference. Keep going!", author: "James Clear" },
+    { text: "Progress, not perfection.", author: "Kim Collins" },
+    { text: "One day at a time.", author: "Anonymous" },
+    { text: "Your future is created by what you do today.", author: "Robert Kiyosaki" },
+  ];
+
+  useEffect(() => {
+    const random = Math.floor(Math.random() * quotes.length);
+    setQuote(quotes[random]);
+    const interval = setInterval(() => setDateTime(new Date()), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const toggleHabit = (index) => {
+    const updated = [...habits];
+    updated[index].completed = !updated[index].completed;
+    setHabits(updated);
+  };
+
+  const handleAddHabit = () => {
+    if (newHabit.trim()) {
+      setHabits([...habits, { name: newHabit.trim(), completed: false }]);
+      setNewHabit("");
+      setShowInput(false);
+    }
+  };
+
+  const deleteHabit = (index) => {
+    const updated = [...habits];
+    updated.splice(index, 1);
+    setHabits(updated);
+  };
+
+  const isDay = dateTime.getHours() >= 6 && dateTime.getHours() < 18;
+  const formattedDate = dateTime.toLocaleDateString();
+  const formattedTime = dateTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  const generateMonthCalendar = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const calendar = [];
+    let dayCount = 1;
+    for (let i = 0; i < 6; i++) {
+      const week = [];
+      for (let j = 0; j < 7; j++) {
+        if ((i === 0 && j < firstDay) || dayCount > daysInMonth) {
+          week.push(null);
+        } else {
+          const dayKey = `${year}-${(month + 1).toString().padStart(2, "0")}-${dayCount
+            .toString()
+            .padStart(2, "0")}`;
+          week.push({
+            day: dayCount,
+            completed: completedDates.includes(dayKey),
+            today: dayKey === new Date().toISOString().split("T")[0],
+            key: dayKey,
+          });
+          dayCount++;
+        }
+      }
+      calendar.push(week);
+    }
+    return calendar;
+  };
+
+  const calendar = generateMonthCalendar();
+  const currentWeek = calendar.find((week) => week.some((day) => day?.today));
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div className="text-gray-700">
+          <p className="text-sm">{formattedDate} • {formattedTime}</p>
+          <div className="flex items-center space-x-2 mt-1">
+            {isDay ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-blue-500" />}
+            <span>72°F 🌤️</span>
+          </div>
+        </div>
+        <h1 className="text-4xl font-bold text-purple-800">🌱 Habit Harmony 🌞</h1>
+      </div>
+
+      <h2 className="text-2xl font-semibold text-gray-800 mb-8 text-center">Welcome back! You're doing amazing 💪</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Today's Habits */}
+        <Card className="shadow-md">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <CalendarDays className="w-6 h-6 text-blue-600 mr-2" />
+                <h3 className="text-lg font-semibold text-gray-800">Today's Habits</h3>
+              </div>
+              <Button size="sm" onClick={() => setShowInput(!showInput)}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {showInput && (
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  value={newHabit}
+                  onChange={(e) => setNewHabit(e.target.value)}
+                  className="flex-1 border rounded px-2 py-1"
+                  placeholder="Enter a new habit"
+                />
+                <Button size="sm" onClick={handleAddHabit}>Add</Button>
+              </div>
+            )}
+
+            <ul className="space-y-3">
+              {habits.map((habit, index) => (
+                <li key={index} className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={habit.completed}
+                      onChange={() => toggleHabit(index)}
+                      className="mr-2"
+                    />
+                    <span className={habit.completed ? "line-through text-gray-500" : "text-gray-700"}>{habit.name}</span>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => deleteHabit(index)}>
+                    <Trash className="w-4 h-4 text-red-400" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+            <Button className="mt-4 w-full">See All Habits</Button>
+          </CardContent>
+        </Card>
+
+        {/* Weekly Progress */}
+        <Card className="shadow-md">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-center mb-4">
+              <CheckCircle className="w-6 h-6 text-green-600 mr-2" />
+              <h3 className="text-lg font-semibold text-gray-800">Weekly Progress</h3>
+            </div>
+            <p className="text-gray-600 text-center mb-2">You're on a {streak}-day streak!</p>
+
+            {/* Weekly Calendar */}
+            <div className="bg-white rounded-md p-2 shadow-inner">
+              <table className="w-full text-xs text-center text-purple-600 mb-4">
+                <thead>
+                  <tr>
+                    <th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentWeek && (
+                    <tr>
+                      {currentWeek.map((day, j) => (
+                        <td key={j} className={`py-1 ${day?.today ? 'bg-purple-500 text-white' : day?.completed ? 'bg-purple-300 text-white' : 'bg-purple-100'} rounded`}>
+                          {day?.day || ''}
+                        </td>
+                      ))}
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+              {/* Monthly Progress Calendar */}
+              <p className="text-sm font-semibold text-purple-800 mb-1">📆 Monthly Progress</p>
+              <table className="w-full text-xs text-center text-purple-600">
+                <thead>
+                  <tr>
+                    <th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {calendar.map((week, i) => (
+                    <tr key={i}>
+                      {week.map((day, j) => (
+                        <td key={j} className={`py-1 ${day?.today ? 'bg-purple-500 text-white' : day?.completed ? 'bg-purple-300 text-white' : 'bg-purple-100'} rounded`}>
+                          {day?.day || ''}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="text-xs text-center text-gray-500 mt-2">Monthly streaks: {Math.floor(streak / 7)} weeks completed!</p>
+            </div>
+            <Button className="mt-4 w-full">See Progress</Button>
+          </CardContent>
+        </Card>
+
+        {/* Motivation Corner */}
+        <Card className="shadow-md">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-center mb-4">
+              <Flame className="w-6 h-6 text-orange-500 mr-2" />
+              <h3 className="text-lg font-semibold text-gray-800">Motivation Corner</h3>
+            </div>
+            <p className="text-center italic text-gray-700 mb-2">"{quote.text}"</p>
+            <p className="text-sm text-center text-gray-600 mb-4">– {quote.author}</p>
+            <div className="text-center text-4xl">✨</div>
+            <Button className="mt-4 w-full" onClick={() => window.location.reload()}>Refresh Quote</Button>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

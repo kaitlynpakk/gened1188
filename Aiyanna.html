@@ -1580,13 +1580,27 @@ function renderHabits() {
 function toggleHabit(index) {
   habits[index].completed = !habits[index].completed;
   renderHabits();
+  checkAllHabitsCompleted();
 }
 
 function deleteHabit(index) {
   habits.splice(index, 1);
   renderHabits();
 }
-
+function checkAllHabitsCompleted() {
+  if (habits.length > 0 && habits.every(habit => habit.completed)) {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    if (!completedDates.includes(todayStr)) {
+      completedDates.push(todayStr);
+      localStorage.setItem(`completedDates_${userName}`, JSON.stringify(completedDates));
+      showToast("🎉 All habits completed for today! Streak updated!", "info");
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    }
+    updateStreak();
+    generateCalendar();
+  }
+}
 
 document.getElementById('add-habit').onclick = () => {
   const input = document.getElementById('new-habit');
@@ -1674,6 +1688,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const storedUser = localStorage.getItem("lastUser");
   if (storedUser && localStorage.getItem("hasOnboarded_" + storedUser) === "true") {
       userName = storedUser;
+      completedDates.length = 0; // Clear anything old
+      const savedDates = JSON.parse(localStorage.getItem(`completedDates_${userName}`) || "[]");
+      completedDates.push(...savedDates);
     
       // Load stored goals/motivation/shortterm habits
       selectedGoals = JSON.parse(localStorage.getItem(`goals_${userName}`) || "[]");

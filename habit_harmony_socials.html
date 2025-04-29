@@ -1,14 +1,269 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Habit Harmony - Socials</title>
-  ...
-  (TRUNCATED HERE - full content already captured in previous step)
-  ...
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #cfe0fc, #e2d4f9);
+      font-family: 'Poppins', sans-serif;
+      padding: 24px;
+      text-align: center;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      padding: 24px;
+      margin: 20px auto;
+      max-width: 500px;
+      text-align: left;
+    }
+    .btn {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .flex {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🌱 Habit Harmony - Socials</h1>
+
+<div class="card" id="choice-card">
+  <h3>Welcome!</h3>
+  <button class="btn" onclick="enterSite()">View Posts</button>
+</div>
+
+<div id="post-area" style="display:none;">
+  <div class="card">
+    <button class="btn" onclick="toggleCreatePost()">Create a Post</button>
+    <button class="btn" style="background:red;" onclick="clearPosts()">(Dev) Clear All Posts</button>
+  </div>
+  <div class="card" id="create-post-card" style="display:none;">
+    <h3>Create a Post</h3>
+    <input type="text" id="post-username" class="input" placeholder="Your Username" />
+    <input type="file" id="post-avatar" class="input" accept="image/jpeg, image/png" />
+    <input type="password" id="post-password" class="input" placeholder="Set a Password (to delete later)" />
+    <input type="text" id="post-title" class="input" placeholder="Post Title" />
+    <input type="text" id="post-caption" class="input" placeholder="Write your caption..." />
+    <input type="file" id="post-image" class="input" accept="image/jpeg, image/png" />
+    <input type="number" id="post-rating" class="input" placeholder="Rating (out of 10)" min="1" max="10" />
+    <button class="btn" onclick="submitPost()">Post!</button>
+  </div>
+  <div id="posts"></div>
+</div>
+
+<script>
+function enterSite() {
+  document.getElementById('choice-card').style.display = 'none';
+  document.getElementById('post-area').style.display = 'block';
+  loadPosts();
+}
+
+function toggleCreatePost() {
+  const card = document.getElementById('create-post-card');
+  card.style.display = card.style.display === 'none' ? 'block' : 'none';
+}
+
+function submitPost() {
+  const username = document.getElementById('post-username').value.trim();
+  const password = document.getElementById('post-password').value.trim();
+  const title = document.getElementById('post-title').value.trim();
+  const caption = document.getElementById('post-caption').value.trim();
+  let rating = document.getElementById('post-rating').value.trim();
+  const avatarFile = document.getElementById('post-avatar').files[0];
+  const imageFile = document.getElementById('post-image').files[0];
+
+  if (!username || !password || !title || !caption || !rating) {
+    alert('Please fill out all fields.');
+    return;
+  }
+
+  rating = parseInt(rating);
+  if (isNaN(rating) || rating < 1 || rating > 10) {
+    alert('Rating must be an integer between 1 and 10.');
+    return;
+  }
+
+  const postId = Date.now();
+
+  const avatarReader = new FileReader();
+  avatarReader.onloadend = function() {
+    const avatarData = avatarFile ? avatarReader.result : 'https://via.placeholder.com/40';
+
+    const imageReader = new FileReader();
+    imageReader.onloadend = function() {
+      const postImageData = imageFile ? imageReader.result : '';
+
+      const newPost = {
+        id: postId,
+        user: username,
+        avatar: avatarData,
+        password: password,
+        title,
+        caption,
+        image: postImageData,
+        rating,
+        likes: []
+      };
+      savePost(newPost);
+      loadPosts();
+      clearForm();
+      document.getElementById('create-post-card').style.display = 'none';
+    };
+
+    if (imageFile) {
+      imageReader.readAsDataURL(imageFile);
+    } else {
+      imageReader.onloadend();
+    }
+  };
+
+  if (avatarFile) {
+    avatarReader.readAsDataURL(avatarFile);
+  } else {
+    avatarReader.onloadend();
+  }
+}
+
+function savePost(post) {
+  const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+  posts.unshift(post);
+  localStorage.setItem('posts', JSON.stringify(posts));
+}
+
+function loadPosts() {
+  const postsDiv = document.getElementById('posts');
+  postsDiv.innerHTML = '';
+  const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+  posts.forEach(post => {
+    post.likes = post.likes || [];
+    renderPost(post);
+  });
+}
+
+function renderPost(post) {
+  const postsDiv = document.getElementById('posts');
+  const postCard = document.createElement('div');
+  postCard.className = 'card';
+
+  postCard.innerHTML = `
+    <div class="flex mb-2">
+      <img src="${post.avatar}" class="avatar">
+      <strong>${post.user}</strong>
+    </div>
+    <h4>${post.title}</h4>
+    <p>${post.caption}</p>
+    ${post.image ? `<img src="${post.image}" style="max-width:100%; margin-top:8px; border-radius:8px;">` : ''}
+    <p style="margin-top:8px;">⭐ Rating: ${post.rating}/10</p>
+    <p>❤️ Likes: ${(post.likes || []).length}</p>
+  `;
+
+  const likeBtn = document.createElement('button');
+  likeBtn.className = 'btn';
+  likeBtn.textContent = '❤️ Like';
+  likeBtn.onclick = () => likePost(post.id);
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'btn';
+  deleteBtn.style.background = 'crimson';
+  deleteBtn.textContent = '🗑️ Delete';
+  deleteBtn.onclick = () => requestDeletePost(post.id);
+
+  postCard.appendChild(likeBtn);
+  postCard.appendChild(deleteBtn);
+
+  postsDiv.appendChild(postCard);
+}
+
+function likePost(postId) {
+  const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+  const post = posts.find(p => p.id === postId);
+  if (post) {
+    const liker = prompt('Enter your username to like this post:');
+    if (!liker) return;
+
+    if (!post.likes.includes(liker)) {
+      post.likes.push(liker);
+      localStorage.setItem('posts', JSON.stringify(posts));
+      loadPosts();
+    } else {
+      alert('You have already liked this post.');
+    }
+  }
+}
+
+function requestDeletePost(postId) {
+  let posts = JSON.parse(localStorage.getItem('posts') || '[]');
+  const post = posts.find(p => p.id === postId);
+
+  if (!post) {
+    alert('Post not found.');
+    return;
+  }
+
+  if (!post.password) {
+    alert('This post does not have a password and cannot be deleted.');
+    return;
+  }
+
+  const passwordInput = prompt('Enter your password to delete this post:');
+  if (passwordInput === null) return;
+
+  if (post.password === passwordInput) {
+    posts = posts.filter(p => p.id !== postId);
+    localStorage.setItem('posts', JSON.stringify(posts));
+    loadPosts();
+    alert('Post successfully deleted!');
+  } else {
+    alert('Incorrect password. Cannot delete post.');
+  }
+}
+
+function clearForm() {
+  document.getElementById('post-username').value = '';
+  document.getElementById('post-password').value = '';
+  document.getElementById('post-title').value = '';
+  document.getElementById('post-caption').value = '';
+  document.getElementById('post-rating').value = '';
+  document.getElementById('post-image').value = '';
+  document.getElementById('post-avatar').value = '';
+}
+
+function clearPosts() {
+  if (confirm('Are you sure you want to clear all posts?')) {
+    localStorage.removeItem('posts');
+    loadPosts();
+  }
+}
 </script>
 
 </body>
 </html>
+

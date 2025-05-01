@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Harmony - Social Feed</title>
+  <style>
+    body {
+      background-color: #f3e8ff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #4b0082;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #6a0dad;
+      margin-bottom: 30px;
+    }
+
+    form {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      margin-bottom: 40px;
+    }
+
+    form input, form textarea, form select, form button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    form button {
+      background-color: #a259ff;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    form button:hover {
+      background-color: #8a3dcc;
+    }
+
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .post {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .post:hover {
+      transform: scale(1.01);
+    }
+
+    .post img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    .post h3 {
+      margin-top: 0;
+      color: #6a0dad;
+    }
+
+    .post p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Habit Harmony Social Feed</h1>
+    <form id="postForm">
+      <input type="text" id="username" placeholder="Your Username" required>
+      <input type="text" id="title" placeholder="Title" required>
+      <textarea id="caption" placeholder="Write a caption..." required></textarea>
+      <input type="file" id="imageFile" accept="image/jpeg" required>
+      <select id="rating" required>
+        <option value="">Rating (1-10)</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select>
+      <button type="submit">Post</button>
+    </form>
+
+    <div class="feed" id="feed">
+      <!-- Posts will be appended here -->
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('postForm');
+    const feed = document.getElementById('feed');
+
+    function renderPost(postData) {
+      const post = document.createElement('div');
+      post.className = 'post';
+      post.innerHTML = `
+        <h3>${postData.title}</h3>
+        <p><strong>@${postData.username}</strong></p>
+        <p>${postData.caption}</p>
+        <img src="${postData.imageData}" alt="User posted image">
+        <p><strong>Rating:</strong> ${postData.rating}/10</p>
+      `;
+      feed.prepend(post);
+    }
+
+    function savePost(postData) {
+      let allPosts = JSON.parse(localStorage.getItem('allPosts')) || [];
+      allPosts.push(postData);
+      localStorage.setItem('allPosts', JSON.stringify(allPosts));
+    }
+
+    function loadAllPosts() {
+      const allPosts = JSON.parse(localStorage.getItem('allPosts')) || [];
+      allPosts.reverse().forEach(renderPost);
+    }
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const title = document.getElementById('title').value.trim();
+      const caption = document.getElementById('caption').value.trim();
+      const imageFile = document.getElementById('imageFile').files[0];
+      const rating = document.getElementById('rating').value;
+
+      if (!imageFile || !username || !title || !caption || !rating) {
+        alert("Please fill out all fields including uploading a JPEG image.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const postData = {
+          username,
+          title,
+          caption,
+          imageData: e.target.result,
+          rating
+        };
+        renderPost(postData);
+        savePost(postData);
+        form.reset();
+      };
+      reader.readAsDataURL(imageFile);
+    });
+
+    // Load posts on page load
+    window.onload = loadAllPosts;
+  </script>
+</body>
+</html>

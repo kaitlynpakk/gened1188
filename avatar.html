@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Harmony - Create Your Avatar</title>
+  <style>
+    @font-face {
+      font-family: 'Satoshi';
+      src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    }
+    
+    body {
+      font-family: 'Satoshi', 'Inter', sans-serif;
+      background: linear-gradient(to bottom right, #cfe0fc, #e2d4f9);
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+      padding: 24px;
+      margin: 20px auto;
+      transition: all 0.3s ease-in-out;
+    }
+    
+    h1, h2, h3 {
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #6b21a8;
+    }
+    
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    
+    button {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-family: inherit;
+      transition: background 0.3s ease;
+    }
+    
+    button:hover {
+      background: #6b21a8;
+    }
+    
+    .avatar-preview {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: #fff;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      border: 4px solid #7c3aed;
+    }
+    
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .avatar-parts {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .avatar-part {
+      text-align: center;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .avatar-part:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .avatar-part.selected {
+      border: 2px solid #7c3aed;
+      box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+    }
+    
+    .avatar-part img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+    }
+    
+    .avatar-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .color-picker {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+    
+    .color-swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.2s ease;
+    }
+    
+    .color-swatch:hover {
+      transform: scale(1.1);
+    }
+    
+    .color-swatch.selected {
+      border: 2px solid #333;
+      transform: scale(1.1);
+    }
+    
+    .avatar-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 10px;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+    }
+    
+    .tab {
+      padding: 10px 20px;
+      background: #f0f0f0;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    
+    .tab.active {
+      background: #7c3aed;
+      color: white;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .user-info {
+      background: #7c3aed;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 30px;
+      display: inline-block;
+      margin: 0 auto;
+      text-align: center;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .two-column {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .column {
+      flex: 1;
+      min-width: 300px;
+    }
+    
+    .avatar-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: sticky;
+      top: 20px;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: opacity 0.3s ease;
+    }
+    
+    .success-toast {
+      background: #28a745;
+    }
+    
+    .error-toast {
+      background: #dc3545;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px) translateX(-50%); }
+      to { opacity: 1; transform: translateY(0) translateX(-50%); }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    .fade-out {
+      animation: fadeOut 0.5s ease forwards;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+    }
+    
+    @media (max-width: 768px) {
+      .two-column {
+        flex-direction: column;
+      }
+      
+      .column {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🌱 Habit Harmony Avatar Creator</h1>
+      <div class="user-info">Currently logged in as: <strong id="current-user">TestUser</strong></div>
+    </div>
+    
+    <div class="nav-buttons">
+      <button onclick="window.location.href='social-feed.html'">← Back to Social Feed</button>
+    </div>
+    
+    <div class="two-column">
+      <div class="column">
+        <div class="card avatar-display">
+          <h2>Your Avatar</h2>
+          <div class="avatar-preview" id="avatar-preview">
+            <!-- Avatar components will be layered here -->
+            <div id="skin-layer" style="position: absolute; width: 100%; height: 100%;"></div>
+            <div id="hair-layer" style="position: absolute; width: 100%; height: 100%;"></div>
+            <div id="eyes-layer" style="position: absolute; width: 100%; height: 100%;"></div>
+            <div id="mouth-layer" style="position: absolute; width: 100%; height: 100%;"></div>
+            <div id="outfit-layer" style="position: absolute; width: 100%; height: 100%;"></div>
+            <div id="accessories-layer" style="position: absolute; width: 100%; height: 100%;"></div>
+          </div>
+          
+          <div style="margin-top: 20px;">
+            <button id="save-avatar" class="save-button">Save Avatar</button>
+            <button id="random-avatar">Random Avatar</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="column">
+        <div class="card">
+          <h2>Customize Your Avatar</h2>
+          
+          <div class="tabs">
+            <div class="tab active" data-tab="skin">Skin</div>
+            <div class="tab" data-tab="hair">Hair</div>
+            <div class="tab" data-tab="eyes">Eyes</div>
+            <div class="tab" data-tab="mouth">Mouth</div>
+            <div class="tab" data-tab="outfit">Outfit</div>
+            <div class="tab" data-tab="accessories">Accessories</div>
+          </div>
+          
+          <div id="skin" class="tab-content active">
+            <div class="avatar-section">
+              <h3>Skin Tone</h3>
+              <div class="color-picker" id="skin-colors">
+                <div class="color-swatch selected" style="background-color: #FDE3D5;" data-color="#FDE3D5"></div>
+                <div class="color-swatch" style="background-color: #F1C27D;" data-color="#F1C27D"></div>
+                <div class="color-swatch" style="background-color: #E0AC69;" data-color="#E0AC69"></div>
+                <div class="color-swatch" style="background-color: #C68642;" data-color="#C68642"></div>
+                <div class="color-swatch" style="background-color: #8D5524;" data-color="#8D5524"></div>
+                <div class="color-swatch" style="background-color: #5C3518;" data-color="#5C3518"></div>
+              </div>
+            </div>
+            
+            <div class="avatar-section">
+              <h3>Face Shape</h3>
+              <div class="avatar-parts" id="face-shapes">
+                <div class="avatar-part selected" data-type="face" data-id="round">
+                  <img src="https://i.ibb.co/tYmPyKG/round-face.png" alt="Round face">
+                  <p>Round</p>
+                </div>
+                <div class="avatar-part" data-type="face" data-id="oval">
+                  <img src="https://i.ibb.co/bJsq5Wy/oval-face.png" alt="Oval face">
+                  <p>Oval</p>
+                </div>
+                <div class="avatar-part" data-type="face" data-id="square">
+                  <img src="https://i.ibb.co/9Z9LkCK/square-face.png" alt="Square face">
+                  <p>Square</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="hair" class="tab-content">
+            <div class="avatar-section">
+              <h3>Hair Style</h3>
+              <div class="avatar-parts" id="hair-styles">
+                <div class="avatar-part selected" data-type="hair" data-id="short">
+                  <img src="https://i.ibb.co/3Ydg9KN/short-hair.png" alt="Short hair">
+                  <p>Short</p>
+                </div>
+                <div class="avatar-part" data-type="hair" data-id="medium">
+                  <img src="https://i.ibb.co/4NJLwZY/medium-hair.png" alt="Medium hair">
+                  <p>Medium</p>
+                </div>
+                <div class="avatar-part" data-type="hair" data-id="long">
+                  <img src="https://i.ibb.co/pKzncjk/long-hair.png" alt="Long hair">
+                  <p>Long</p>
+                </div>
+                <div class="avatar-part" data-type="hair" data-id="curly">
+                  <img src="https://i.ibb.co/fG92cYZ/curly-hair.png" alt="Curly hair">
+                  <p>Curly</p>
+                </div>
+                <div class="avatar-part" data-type="hair" data-id="bald">
+                  <img src="https://i.ibb.co/KyptzQ7/bald.png" alt="Bald">
+                  <p>Bald</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="avatar-section">
+              <h3>Hair Color</h3>
+              <div class="color-picker" id="hair-colors">
+                <div class="color-swatch selected" style="background-color: #090806;" data-color="#090806"></div>
+                <div class="color-swatch" style="background-color: #8D4A43;" data-color="#8D4A43"></div>
+                <div class="color-swatch" style="background-color: #B55239;" data-color="#B55239"></div>
+                <div class="color-swatch" style="background-color: #D6C4C2;" data-color="#D6C4C2"></div>
+                <div class="color-swatch" style="background-color: #DECBC6;" data-color="#DECBC6"></div>
+                <div class="color-swatch" style="background-color: #F7F6F2;" data-color="#F7F6F2"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="eyes" class="tab-content">
+            <div class="avatar-section">
+              <h3>Eye Shape</h3>
+              <div class="avatar-parts" id="eye-shapes">
+                <div class="avatar-part selected" data-type="eyes" data-id="round">
+                  <img src="https://i.ibb.co/pQmGm4v/round-eyes.png" alt="Round eyes">
+                  <p>Round</p>
+                </div>
+                <div class="avatar-part" data-type="eyes" data-id="almond">
+                  <img src="https://i.ibb.co/PDR5Zvw/almond-eyes.png" alt="Almond eyes">
+                  <p>Almond</p>
+                </div>
+                <div class="avatar-part" data-type="eyes" data-id="wide">
+                  <img src="https://i.ibb.co/hdCbDrM/wide-eyes.png" alt="Wide eyes">
+                  <p>Wide</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="avatar-section">
+              <h3>Eye Color</h3>
+              <div class="color-picker" id="eye-colors">
+                <div class="color-swatch selected" style="background-color: #634e34;" data-color="#634e34"></div>
+                <div class="color-swatch" style="background-color: #2e536f;" data-color="#2e536f"></div>
+                <div class="color-swatch" style="background-color: #285c4d;" data-color="#285c4d"></div>
+                <div class="color-swatch" style="background-color: #3a3839;" data-color="#3a3839"></div>
+                <div class="color-swatch" style="background-color: #7c4b4b;" data-color="#7c4b4b"></div>
+                <div class="color-swatch" style="background-color: #8a5a83;" data-color="#8a5a83"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="mouth" class="tab-content">
+            <div class="avatar-section">
+              <h3>Mouth Style</h3>
+              <div class="avatar-parts" id="mouth-styles">
+                <div class="avatar-part selected" data-type="mouth" data-id="smile">
+                  <img src="https://i.ibb.co/QjtzXSR/smile.png" alt="Smile">
+                  <p>Smile</p>
+                </div>
+                <div class="avatar-part" data-type="mouth" data-id="neutral">
+                  <img src="https://i.ibb.co/TKqR8bT/neutral.png" alt="Neutral">
+                  <p>Neutral</p>
+                </div>
+                <div class="avatar-part" data-type="mouth" data-id="laugh">
+                  <img src="https://i.ibb.co/r3kSk5P/laugh.png" alt="Laugh">
+                  <p>Laugh</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="outfit" class="tab-content">
+            <div class="avatar-section">
+              <h3>Outfit Style</h3>
+              <div class="avatar-parts" id="outfit-styles">
+                <div class="avatar-part selected" data-type="outfit" data-id="casual">
+                  <img src="https://i.ibb.co/8gjc3ZH/casual-outfit.png" alt="Casual outfit">
+                  <p>Casual</p>
+                </div>
+                <div class="avatar-part" data-type="outfit" data-id="formal">
+                  <img src="https://i.ibb.co/vJchxfh/formal-outfit.png" alt="Formal outfit">
+                  <p>Formal</p>
+                </div>
+                <div class="avatar-part" data-type="outfit" data-id="athletic">
+                  <img src="https://i.ibb.co/Gnm6jWT/athletic-outfit.png" alt="Athletic outfit">
+                  <p>Athletic</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="avatar-section">
+              <h3>Outfit Color</h3>
+              <div class="color-picker" id="outfit-colors">
+                <div class="color-swatch selected" style="background-color: #3498db;" data-color="#3498db"></div>
+                <div class="color-swatch" style="background-color: #2ecc71;" data-color="#2ecc71"></div>
+                <div class="color-swatch" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
+                <div class="color-swatch" style="background-color: #f1c40f;" data-color="#f1c40f"></div>
+                <div class="color-swatch" style="background-color: #9b59b6;" data-color="#9b59b6"></div>
+                <div class="color-swatch" style="background-color: #34495e;" data-color="#34495e"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="accessories" class="tab-content">
+            <div class="avatar-section">
+              <h3>Accessories</h3>
+              <div class="avatar-parts" id="accessory-styles">
+                <div class="avatar-part selected" data-type="accessory" data-id="none">
+                  <img src="https://i.ibb.co/ZGp6Kv2/none.png" alt="No accessories">
+                  <p>None</p>
+                </div>
+                <div class="avatar-part" data-type="accessory" data-id="glasses">
+                  <img src="https://i.ibb.co/vqmKG2s/glasses.png" alt="Glasses">
+                  <p>Glasses</p>
+                </div>
+                <div class="avatar-part" data-type="accessory" data-id="earrings">
+                  <img src="https://i.ibb.co/XWtZYdG/earrings.png" alt="Earrings">
+                  <p>Earrings</p>
+                </div>
+                <div class="avatar-part" data-type="accessory" data-id="hat">
+                  <img src="https://i.ibb.co/hMDsF07/hat.png" alt="Hat">
+                  <p>Hat</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get username from local storage
+    let userName = localStorage.getItem('currentUser') || "TestUser";
+    document.getElementById('current-user').textContent = userName;
+    
+    // Avatar state
+    const avatarState = {
+      face: 'round',
+      skinColor: '#FDE3D5',
+      hair: 'short',
+      hairColor: '#090806',
+      eyes: 'round',
+      eyeColor: '#634e34',
+      mouth: 'smile',
+      outfit: 'casual',
+      outfitColor: '#3498db',
+      accessory: 'none'
+    };
+    
+    // Load existing avatar if available
+    loadExistingAvatar();
+    
+    // Initialize avatar preview
+    updateAvatarPreview();
+    
+    // Tab switching functionality
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        this.classList.add('active');
+        
+        // Show corresponding tab content
+        const tabId = this.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+    
+    // Part selection functionality
+    document.querySelectorAll('.avatar-part').forEach(part => {
+      part.addEventListener('click', function() {
+        const type = this.getAttribute('data-type');
+        const id = this.getAttribute('data-id');
+        
+        // Remove selected class from siblings
+        document.querySelectorAll(`.avatar-part[data-type="${type}"]`).forEach(p => p.classList.remove('selected'));
+        
+        // Add selected class to this part
+        this.classList.add('selected');
+        
+        // Update avatar state
+        if (type === 'face') avatarState.face = id;
+        else if (type === 'hair') avatarState.hair = id;
+        else if (type === 'eyes') avatarState.eyes = id;
+        else if (type === 'mouth') avatarState.mouth = id;
+        else if (type === 'outfit') avatarState.outfit = id;
+        else if (type === 'accessory') avatarState.accessory = id;
+        
+        updateAvatarPreview();
+      });
+    });
+    
+    // Color swatch selection functionality
+    document.querySelectorAll('.color-swatch').forEach(swatch => {
+      swatch.addEventListener('click', function() {
+        const color = this.getAttribute('data-color');
+        
+        // Find parent color picker
+        const colorPicker = this.parentElement;
+        
+        // Remove selected class from siblings
+        colorPicker.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+        
+        // Add selected class to this swatch
+        this.classList.add('selected');
+        
+        // Update avatar state based on parent color picker id
+        if (colorPicker.id === 'skin-colors') avatarState.skinColor = color;
+        else if (colorPicker.id === 'hair-colors') avatarState.hairColor = color;
+        else if (colorPicker.id === 'eye-colors') avatarState.eyeColor = color;
+        else if (colorPicker.id === 'outfit-colors') avatarState.outfitColor = color;
+        
+        updateAvatarPreview();
+      });
+    });
+    
+    // Save avatar button click
+    document.getElementById('save-avatar').addEventListener('click', function() {
+      // Save avatar state to local storage
+      localStorage.setItem('userAvatar', JSON.stringify(avatarState));
+      
+      // Convert avatar to data URL and save it
+      const avatarElement = document.getElementById('avatar-preview');
+      html2canvas(avatarElement).then(canvas => {
+        const avatarImageUrl = canvas.toDataURL('image/png');
+        localStorage.setItem('userAvatarImage', avatarImageUrl);
+        showToast('Your avatar has been saved!', 'success');
+      });
+    });
+    
+    // Random avatar button click
+    document.getElementById('random-avatar').addEventListener('click', function() {
+      // Generate random avatar state
+      const randomAvatar = {
+        face: getRandomItem(['round', 'oval', 'square']),
+        skinColor: getRandomItem(['#FDE3D5', '#F1C27D', '#E0AC69', '#C68642', '#8D5524', '#5C3518']),
+        hair: getRandomItem(['short', 'medium', 'long', 'curly', 'bald']),
+        hairColor: getRandomItem(['#090806', '#8D4A43', '#B55239', '#D6C4C2', '#DECBC6', '#F7F6F2']),
+        eyes: getRandomItem(['round', 'almond', 'wide']),
+        eyeColor: getRandomItem(['#634e34', '#2e536f', '#285c4d', '#3a3839', '#7c4b4b', '#8a5a83']),
+        mouth: getRandomItem(['smile', 'neutral', 'laugh']),
+        outfit: getRandomItem(['casual', 'formal', 'athletic']),
+        outfitColor: getRandomItem(['#3498db', '#2ecc71', '#e74c3c', '#f1c40f', '#9b59b6', '#34495e']),
+        accessory: getRandomItem(['none', 'glasses', 'earrings', 'hat'])
+      };
+      
+      // Update avatar state
+      Object.assign(avatarState, randomAvatar);
+      
+      // Update UI to reflect new state
+      updateUIFromState();
+      
+      // Update preview
+      updateAvatarPreview();
+      
+      showToast('Created a random avatar!', 'success');
+    });
+    
+    function getRandomItem(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    }
+    
+    function updateUIFromState() {
+      // Update face shape selection
+      document.querySelectorAll(`.avatar-part[data-type="face"]`).forEach(part => {
+        part.classList.toggle('selected', part.getAttribute('data-id') === avatarState.face);
+      });
+      
+      // Update skin color selection
+      document.querySelectorAll('#skin-colors .color-swatch').forEach(swatch => {
+        swatch.classList.toggle('selected', swatch.getAttribute('data-color') === avatarState.skinColor);
+      });
+      
+      // Update hair style selection
+      document.querySelectorAll(`.avatar-part[data-type="hair"]`).forEach(part => {
+        part.classList.toggle('selected', part.getAttribute('data-id') === avatarState.hair);
+      });
+      
+      // Update hair color selection
+      document.querySelectorAll('#hair-colors .color-swatch').forEach(swatch => {
+        swatch.classList.toggle('selected', swatch.getAttribute('data-color') === avatarState.hairColor);
+      });
+      
+      // Update eye shape selection
+      document.querySelectorAll(`.avatar-part[data-type="eyes"]`).forEach(part => {
+        part.classList.toggle('selected', part.getAttribute('data-id') === avatarState.eyes);
+      });
+      
+      // Update eye color selection
+      document.querySelectorAll('#eye-colors .color-swatch').forEach(swatch => {
+        swatch.classList.toggle('selected', swatch.getAttribute('data-color') === avatarState.eyeColor);
+      });
+      
+      // Update mouth style selection
+      document.querySelectorAll(`.avatar-part[data-type="mouth"]`).forEach(part => {
+        part.classList.toggle('selected', part.getAttribute('data-id') === avatarState.mouth);
+      });
+      
+      // Update outfit style selection
+      document.querySelectorAll(`.avatar-part[data-type="outfit"]`).forEach(part => {
+        part.classList.toggle('selected', part.getAttribute('data-id') === avatarState.outfit);
+      });
+      
+      // Update outfit color selection
+      document.querySelectorAll('#outfit-colors .color-swatch').forEach(swatch => {
+        swatch.classList.toggle('selected', swatch.getAttribute('data-color') === avatarState.outfitColor);
+      });
+      
+      // Update accessory selection
+      document.querySelectorAll(`.avatar-part[data-type="accessory"]`).forEach(part => {
+        part.classList.toggle('selected', part.getAttribute('data-id') === avatarState.accessory);
+      });
+    }
+    
+    function updateAvatarPreview() {
+      // Update the avatar preview based on current state
+      const skinLayer = document.getElementById('skin-layer');
+      const hairLayer = document.getElementById('hair-layer');
+      const eyesLayer = document.getElementById('eyes-layer');
+      const mouthLayer = document.getElementById('mouth-layer');
+      const outfitLayer = document.getElementById('outfit-layer');
+      const accessoriesLayer = document.getElementById('accessories-layer');
+      
+      // Clear all layers
+      skinLayer.innerHTML = '';
+      hairLayer.innerHTML = '';
+      eyesLayer.innerHTML = '';
+      mouthLayer.innerHTML = '';
+      outfitLayer.innerHTML = '';
+      access

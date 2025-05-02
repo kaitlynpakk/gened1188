@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Habit Harmony - Avatar Creator</title>
+  <title>Habit Harmony - Profile Picture Uploader</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,6 +11,7 @@
       margin: 0;
       padding: 20px;
       min-height: 100vh;
+      color: #333;
     }
     
     .container {
@@ -30,6 +31,7 @@
       box-shadow: 0 12px 28px rgba(0,0,0,0.15);
       padding: 24px;
       margin: 20px auto;
+      text-align: center;
     }
     
     .avatar-preview {
@@ -41,121 +43,108 @@
       position: relative;
       overflow: hidden;
       border: 4px solid #7c3aed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
-    .avatar-layer {
-      position: absolute;
+    .avatar-preview img {
       width: 100%;
       height: 100%;
-      top: 0;
-      left: 0;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: cover;
+      object-fit: cover;
     }
     
-    .tabs {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
+    .avatar-placeholder {
+      color: #999;
+      font-size: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .file-upload {
       margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     
-    .tab {
-      background: #f0f0f0;
-      padding: 10px 20px;
-      border-radius: 20px;
-      cursor: pointer;
-      border: none;
-      font-size: 16px;
-    }
-    
-    .tab.active {
+    .file-upload-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: #7c3aed;
       color: white;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 10px;
     }
     
-    .tab-content {
+    .file-upload-label:hover {
+      background: #6b21a8;
+    }
+    
+    .file-upload-input {
       display: none;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.6);
-      border-radius: 15px;
+    }
+    
+    .upload-info {
+      font-size: 14px;
+      color: #666;
       margin-top: 10px;
     }
     
-    .tab-content.active {
-      display: block;
-    }
-    
-    .option-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin: 15px 0;
-    }
-    
-    .option {
-      background: white;
-      padding: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      text-align: center;
-      border: 2px solid transparent;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    
-    .option:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    
-    .option.selected {
-      border-color: #7c3aed;
-      box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
-    }
-    
-    .option-image {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto;
-      display: block;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: contain;
-      border-radius: 10px;
-    }
-    
-    .color-options {
+    .filters {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin: 15px 0;
       justify-content: center;
+      margin: 20px 0;
     }
     
-    .color {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
+    .filter {
+      background: #f0f0f0;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      padding: 10px;
       cursor: pointer;
-      border: 3px solid transparent;
-      transition: transform 0.2s;
+      transition: all 0.2s;
+      width: 80px;
+      text-align: center;
     }
     
-    .color:hover {
-      transform: scale(1.1);
+    .filter:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
     }
     
-    .color.selected {
-      border-color: black;
+    .filter.selected {
+      border-color: #7c3aed;
+      background: #ede9fe;
+    }
+    
+    .filter-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      margin: 0 auto 5px;
+      overflow: hidden;
+      background-color: #ccc;
+    }
+    
+    .filter-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     
     .action-buttons {
       display: flex;
       justify-content: center;
       gap: 15px;
-      margin: 20px 0;
+      margin-top: 20px;
     }
     
     button {
@@ -171,6 +160,48 @@
     
     button:hover {
       background: #6b21a8;
+    }
+    
+    .crop-controls {
+      margin-top: 15px;
+      display: none;
+    }
+    
+    .crop-controls.visible {
+      display: block;
+    }
+    
+    .slider-container {
+      width: 100%;
+      max-width: 300px;
+      margin: 10px auto;
+    }
+    
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: #d3d3d3;
+      outline: none;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #7c3aed;
+      cursor: pointer;
+    }
+    
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #7c3aed;
+      cursor: pointer;
     }
     
     .toast {
@@ -191,168 +222,72 @@
     .toast.show {
       opacity: 1;
     }
+    
+    .error {
+      background: #dc3545;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🌱 Habit Harmony Avatar Creator</h1>
+    <h1>🌱 Habit Harmony Profile Picture</h1>
     
     <div class="avatar-card">
-      <h2>Your Avatar</h2>
-      <div class="avatar-preview">
-        <div id="base-layer" class="avatar-layer"></div>
-        <div id="hair-layer" class="avatar-layer"></div>
-        <div id="eyes-layer" class="avatar-layer"></div>
-        <div id="mouth-layer" class="avatar-layer"></div>
-        <div id="accessory-layer" class="avatar-layer"></div>
+      <h2>Your Profile Picture</h2>
+      <div class="avatar-preview" id="avatar-preview">
+        <div class="avatar-placeholder" id="placeholder-text">
+          <div>
+            <i>No image uploaded yet</i><br>
+            Upload an image to see preview
+          </div>
+        </div>
+        <!-- Preview image will be added here -->
+      </div>
+      
+      <div class="file-upload">
+        <label class="file-upload-label" for="avatar-upload">
+          📷 Choose Image
+        </label>
+        <input type="file" id="avatar-upload" class="file-upload-input" accept="image/*">
+        <div class="upload-info">
+          Supported formats: JPG, PNG, GIF<br>
+          Recommended size: 500x500 pixels or larger
+        </div>
+      </div>
+      
+      <div class="crop-controls" id="crop-controls">
+        <div class="slider-container">
+          <label>Zoom:</label>
+          <input type="range" min="1" max="3" step="0.1" value="1" class="slider" id="zoom-slider">
+        </div>
+      </div>
+
+      <h3>Image Filters</h3>
+      <div class="filters" id="filters">
+        <div class="filter selected" data-filter="none">
+          <div class="filter-preview" id="filter-none"></div>
+          <p>Normal</p>
+        </div>
+        <div class="filter" data-filter="grayscale">
+          <div class="filter-preview" id="filter-grayscale"></div>
+          <p>B&W</p>
+        </div>
+        <div class="filter" data-filter="sepia">
+          <div class="filter-preview" id="filter-sepia"></div>
+          <p>Vintage</p>
+        </div>
+        <div class="filter" data-filter="saturate">
+          <div class="filter-preview" id="filter-saturate"></div>
+          <p>Vibrant</p>
+        </div>
+        <div class="filter" data-filter="contrast">
+          <div class="filter-preview" id="filter-contrast"></div>
+          <p>Contrast</p>
+        </div>
       </div>
       
       <div class="action-buttons">
-        <button id="random-btn">Random Avatar</button>
-        <button id="save-btn">Save Avatar</button>
-      </div>
-    </div>
-    
-    <div class="avatar-card">
-      <h2>Customize Your Avatar</h2>
-      
-      <div class="tabs">
-        <button class="tab active" data-tab="face">Face</button>
-        <button class="tab" data-tab="hair">Hair</button>
-        <button class="tab" data-tab="features">Features</button>
-        <button class="tab" data-tab="accessories">Accessories</button>
-      </div>
-      
-      <!-- Face Tab -->
-      <div id="face-tab" class="tab-content active">
-        <h3>Face Shape</h3>
-        <div class="option-grid">
-          <div class="option selected" data-type="face" data-value="round">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/SQpoPYH.png');"></div>
-            <p>Round</p>
-          </div>
-          <div class="option" data-type="face" data-value="square">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/SWSJ9gx.png');"></div>
-            <p>Square</p>
-          </div>
-          <div class="option" data-type="face" data-value="heart">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/xQtACeE.png');"></div>
-            <p>Heart</p>
-          </div>
-        </div>
-        
-        <h3>Skin Color</h3>
-        <div class="color-options">
-          <div class="color selected" style="background-color: #FDE3D5;" data-type="skin" data-value="#FDE3D5"></div>
-          <div class="color" style="background-color: #F1C27D;" data-type="skin" data-value="#F1C27D"></div>
-          <div class="color" style="background-color: #E0AC69;" data-type="skin" data-value="#E0AC69"></div>
-          <div class="color" style="background-color: #C68642;" data-type="skin" data-value="#C68642"></div>
-          <div class="color" style="background-color: #8D5524;" data-type="skin" data-value="#8D5524"></div>
-          <div class="color" style="background-color: #5C3518;" data-type="skin" data-value="#5C3518"></div>
-        </div>
-      </div>
-      
-      <!-- Hair Tab -->
-      <div id="hair-tab" class="tab-content">
-        <h3>Hair Style</h3>
-        <div class="option-grid">
-          <div class="option selected" data-type="hair" data-value="short">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/pZdUxWt.png');"></div>
-            <p>Short</p>
-          </div>
-          <div class="option" data-type="hair" data-value="medium">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/jGkpbVB.png');"></div>
-            <p>Medium</p>
-          </div>
-          <div class="option" data-type="hair" data-value="long">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/CRP7KYE.png');"></div>
-            <p>Long</p>
-          </div>
-          <div class="option" data-type="hair" data-value="curly">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/S37kQDO.png');"></div>
-            <p>Curly</p>
-          </div>
-          <div class="option" data-type="hair" data-value="bun">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/CT1ZHZp.png');"></div>
-            <p>Bun</p>
-          </div>
-          <div class="option" data-type="hair" data-value="none">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/KcbDPh2.png');"></div>
-            <p>None</p>
-          </div>
-        </div>
-        
-        <h3>Hair Color</h3>
-        <div class="color-options">
-          <div class="color selected" style="background-color: #090806;" data-type="hairColor" data-value="#090806"></div>
-          <div class="color" style="background-color: #8D4A43;" data-type="hairColor" data-value="#8D4A43"></div>
-          <div class="color" style="background-color: #B55239;" data-type="hairColor" data-value="#B55239"></div>
-          <div class="color" style="background-color: #D6C4C2;" data-type="hairColor" data-value="#D6C4C2"></div>
-          <div class="color" style="background-color: #F7F6F2;" data-type="hairColor" data-value="#F7F6F2"></div>
-          <div class="color" style="background-color: #F4D35E;" data-type="hairColor" data-value="#F4D35E"></div>
-        </div>
-      </div>
-      
-      <!-- Features Tab -->
-      <div id="features-tab" class="tab-content">
-        <h3>Eyes</h3>
-        <div class="option-grid">
-          <div class="option selected" data-type="eyes" data-value="default">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/JYJgFYz.png');"></div>
-            <p>Default</p>
-          </div>
-          <div class="option" data-type="eyes" data-value="happy">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/DURGSWd.png');"></div>
-            <p>Happy</p>
-          </div>
-          <div class="option" data-type="eyes" data-value="wink">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/LAcvCsF.png');"></div>
-            <p>Wink</p>
-          </div>
-        </div>
-        
-        <h3>Mouth</h3>
-        <div class="option-grid">
-          <div class="option selected" data-type="mouth" data-value="smile">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/YOOCLmR.png');"></div>
-            <p>Smile</p>
-          </div>
-          <div class="option" data-type="mouth" data-value="laugh">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/8fKRhGt.png');"></div>
-            <p>Laugh</p>
-          </div>
-          <div class="option" data-type="mouth" data-value="neutral">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/dqvB8wZ.png');"></div>
-            <p>Neutral</p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Accessories Tab -->
-      <div id="accessories-tab" class="tab-content">
-        <h3>Head Accessories</h3>
-        <div class="option-grid">
-          <div class="option selected" data-type="accessory" data-value="none">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/KcbDPh2.png');"></div>
-            <p>None</p>
-          </div>
-          <div class="option" data-type="accessory" data-value="glasses">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/Hgr1Pxj.png');"></div>
-            <p>Glasses</p>
-          </div>
-          <div class="option" data-type="accessory" data-value="hat">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/dQ62MHl.png');"></div>
-            <p>Hat</p>
-          </div>
-          <div class="option" data-type="accessory" data-value="flower">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/OUTStsV.png');"></div>
-            <p>Flower</p>
-          </div>
-          <div class="option" data-type="accessory" data-value="headphones">
-            <div class="option-image" style="background-image: url('https://i.imgur.com/sMt3BEZ.png');"></div>
-            <p>Headphones</p>
-          </div>
-        </div>
+        <button id="save-btn" disabled>Save Profile Picture</button>
       </div>
     </div>
   </div>
@@ -360,284 +295,268 @@
   <div id="toast" class="toast"></div>
   
   <script>
-    // Avatar state
-    const avatar = {
-      face: "round",
-      skin: "#FDE3D5",
-      hair: "short",
-      hairColor: "#090806",
-      eyes: "default",
-      mouth: "smile",
-      accessory: "none"
-    };
+    // Get DOM elements
+    const avatarUpload = document.getElementById('avatar-upload');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const placeholderText = document.getElementById('placeholder-text');
+    const saveBtn = document.getElementById('save-btn');
+    const zoomSlider = document.getElementById('zoom-slider');
+    const cropControls = document.getElementById('crop-controls');
     
-    // Avatar images mapping - actual images
-    const avatarImages = {
-      face: {
-        round: "https://i.imgur.com/SQpoPYH.png",
-        square: "https://i.imgur.com/SWSJ9gx.png",
-        heart: "https://i.imgur.com/xQtACeE.png"
-      },
-      hair: {
-        short: "https://i.imgur.com/pZdUxWt.png",
-        medium: "https://i.imgur.com/jGkpbVB.png",
-        long: "https://i.imgur.com/CRP7KYE.png",
-        curly: "https://i.imgur.com/S37kQDO.png",
-        bun: "https://i.imgur.com/CT1ZHZp.png",
-        none: "https://i.imgur.com/KcbDPh2.png"
-      },
-      eyes: {
-        default: "https://i.imgur.com/JYJgFYz.png",
-        happy: "https://i.imgur.com/DURGSWd.png",
-        wink: "https://i.imgur.com/LAcvCsF.png"
-      },
-      mouth: {
-        smile: "https://i.imgur.com/YOOCLmR.png",
-        laugh: "https://i.imgur.com/8fKRhGt.png",
-        neutral: "https://i.imgur.com/dqvB8wZ.png"
-      },
-      accessory: {
-        none: "",
-        glasses: "https://i.imgur.com/Hgr1Pxj.png",
-        hat: "https://i.imgur.com/dQ62MHl.png",
-        flower: "https://i.imgur.com/OUTStsV.png",
-        headphones: "https://i.imgur.com/sMt3BEZ.png"
-      }
-    };
+    // Current state
+    let currentImage = null;
+    let currentFilter = 'none';
+    let zoomLevel = 1;
     
-    // Initialize the avatar preview
-    updateAvatarPreview();
-    
-    // Try to load saved avatar
+    // Load existing avatar if available
     loadSavedAvatar();
     
-    // Tab switching
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        // Remove active class from all tabs and tab content
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        
-        // Add active class to clicked tab
-        tab.classList.add('active');
-        
-        // Show corresponding tab content
-        const tabId = tab.getAttribute('data-tab') + '-tab';
-        document.getElementById(tabId).classList.add('active');
-      });
+    // Add event listeners
+    avatarUpload.addEventListener('change', handleImageUpload);
+    document.querySelectorAll('.filter').forEach(filter => {
+      filter.addEventListener('click', () => applyFilter(filter.getAttribute('data-filter')));
     });
+    zoomSlider.addEventListener('input', handleZoom);
+    saveBtn.addEventListener('click', saveAvatar);
     
-    // Option selection
-    document.querySelectorAll('.option').forEach(option => {
-      option.addEventListener('click', () => {
-        const type = option.getAttribute('data-type');
-        const value = option.getAttribute('data-value');
-        
-        // Remove selected class from all options of the same type
-        document.querySelectorAll(`.option[data-type="${type}"]`).forEach(opt => {
-          opt.classList.remove('selected');
-        });
-        
-        // Add selected class to clicked option
-        option.classList.add('selected');
-        
-        // Update avatar state
-        avatar[type] = value;
-        
-        // Update avatar preview
-        updateAvatarPreview();
-      });
-    });
-    
-    // Color selection
-    document.querySelectorAll('.color').forEach(color => {
-      color.addEventListener('click', () => {
-        const type = color.getAttribute('data-type');
-        const value = color.getAttribute('data-value');
-        
-        // Remove selected class from all colors of the same type
-        document.querySelectorAll(`.color[data-type="${type}"]`).forEach(c => {
-          c.classList.remove('selected');
-        });
-        
-        // Add selected class to clicked color
-        color.classList.add('selected');
-        
-        // Update avatar state
-        avatar[type] = value;
-        
-        // Update avatar preview
-        updateAvatarPreview();
-      });
-    });
-    
-    // Random avatar button
-    document.getElementById('random-btn').addEventListener('click', () => {
-      // Get random selections for each feature
-      avatar.face = getRandomKey(avatarImages.face);
-      avatar.skin = getRandomSkinColor();
-      avatar.hair = getRandomKey(avatarImages.hair);
-      avatar.hairColor = getRandomHairColor();
-      avatar.eyes = getRandomKey(avatarImages.eyes);
-      avatar.mouth = getRandomKey(avatarImages.mouth);
-      avatar.accessory = getRandomKey(avatarImages.accessory);
+    // Handle image upload
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
       
-      // Update UI to match random selections
-      updateUIFromState();
+      if (!file) return;
       
-      // Update avatar preview
-      updateAvatarPreview();
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        showToast('Please select a valid image file (JPG, PNG, or GIF)', true);
+        return;
+      }
       
-      // Show success message
-      showToast('Random avatar created!');
-    });
+      // Validate file size - max 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Image is too large. Maximum size is 5MB', true);
+        return;
+      }
+      
+      const reader = new FileReader();
+      
+      reader.onload = function(event) {
+        // Remove placeholder
+        placeholderText.style.display = 'none';
+        
+        // Create and add the image
+        const img = new Image();
+        img.src = event.target.result;
+        
+        img.onload = function() {
+          // Clear the preview
+          while (avatarPreview.firstChild) {
+            avatarPreview.removeChild(avatarPreview.firstChild);
+          }
+          
+          // Create a clone of the image for the preview
+          const previewImg = document.createElement('img');
+          previewImg.src = img.src;
+          previewImg.id = 'preview-image';
+          previewImg.style.filter = getFilterStyle(currentFilter);
+          avatarPreview.appendChild(previewImg);
+          
+          // Store the current image
+          currentImage = event.target.result;
+          
+          // Update filter previews
+          updateFilterPreviews();
+          
+          // Show crop controls
+          cropControls.classList.add('visible');
+          
+          // Enable the save button
+          saveBtn.disabled = false;
+        };
+      };
+      
+      reader.readAsDataURL(file);
+    }
     
-    // Save avatar button
-    document.getElementById('save-btn').addEventListener('click', () => {
-      // Save avatar state to localStorage
-      localStorage.setItem('savedAvatar', JSON.stringify(avatar));
-      showToast('Avatar saved successfully!');
-    });
+    // Handle zoom
+    function handleZoom() {
+      zoomLevel = zoomSlider.value;
+      const previewImg = document.getElementById('preview-image');
+      if (previewImg) {
+        const scale = 100 * zoomLevel;
+        previewImg.style.width = `${scale}%`;
+        previewImg.style.height = `${scale}%`;
+        
+        // Center the image
+        const offset = (zoomLevel - 1) * 50;
+        previewImg.style.objectPosition = `${offset}% ${offset}%`;
+      }
+    }
+    
+    // Apply filter
+    function applyFilter(filter) {
+      // Update selected filter
+      currentFilter = filter;
+      
+      // Update UI
+      document.querySelectorAll('.filter').forEach(el => {
+        el.classList.toggle('selected', el.getAttribute('data-filter') === filter);
+      });
+      
+      // Apply filter to preview image
+      const previewImg = document.getElementById('preview-image');
+      if (previewImg) {
+        previewImg.style.filter = getFilterStyle(filter);
+      }
+    }
+    
+    // Get CSS filter string
+    function getFilterStyle(filter) {
+      switch(filter) {
+        case 'grayscale':
+          return 'grayscale(1)';
+        case 'sepia':
+          return 'sepia(0.7)';
+        case 'saturate':
+          return 'saturate(2)';
+        case 'contrast':
+          return 'contrast(1.5)';
+        case 'none':
+        default:
+          return 'none';
+      }
+    }
+    
+    // Update all filter previews
+    function updateFilterPreviews() {
+      if (!currentImage) return;
+      
+      const filters = [
+        { id: 'filter-none', filter: 'none' },
+        { id: 'filter-grayscale', filter: 'grayscale' },
+        { id: 'filter-sepia', filter: 'sepia' },
+        { id: 'filter-saturate', filter: 'saturate' },
+        { id: 'filter-contrast', filter: 'contrast' }
+      ];
+      
+      filters.forEach(({ id, filter }) => {
+        const preview = document.getElementById(id);
+        preview.innerHTML = '';
+        
+        const img = document.createElement('img');
+        img.src = currentImage;
+        img.style.filter = getFilterStyle(filter);
+        preview.appendChild(img);
+      });
+    }
+    
+    // Save avatar
+    function saveAvatar() {
+      if (!currentImage) return;
+      
+      try {
+        // Create a canvas element to capture the current state of the avatar
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = document.getElementById('preview-image');
+        
+        // Set canvas size to match our desired output size (circular avatar)
+        canvas.width = 200;
+        canvas.height = 200;
+        
+        // Create circular clipping path
+        ctx.beginPath();
+        ctx.arc(100, 100, 100, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        
+        // Draw the image with zoom and filters applied
+        const offset = (zoomLevel - 1) * 100;
+        
+        // Apply the filter effects to the canvas
+        if (currentFilter !== 'none') {
+          ctx.filter = getFilterStyle(currentFilter);
+        }
+        
+        // Draw the image centered and zoomed
+        const size = 200 * zoomLevel;
+        const x = (200 - size) / 2;
+        const y = (200 - size) / 2;
+        ctx.drawImage(img, x, y, size, size);
+        
+        // Get the data URL of the canvas
+        const avatarDataUrl = canvas.toDataURL('image/png');
+        
+        // Save to localStorage
+        localStorage.setItem('profileAvatar', avatarDataUrl);
+        localStorage.setItem('profileAvatarSettings', JSON.stringify({
+          filter: currentFilter,
+          zoom: zoomLevel
+        }));
+        
+        showToast('Profile picture saved successfully!');
+      } catch (error) {
+        console.error('Error saving avatar:', error);
+        showToast('Error saving profile picture', true);
+      }
+    }
     
     // Load saved avatar if available
     function loadSavedAvatar() {
-      const savedAvatar = localStorage.getItem('savedAvatar');
+      const savedAvatar = localStorage.getItem('profileAvatar');
+      const savedSettings = localStorage.getItem('profileAvatarSettings');
+      
       if (savedAvatar) {
-        try {
-          const parsedAvatar = JSON.parse(savedAvatar);
-          Object.assign(avatar, parsedAvatar);
-          updateUIFromState();
-          updateAvatarPreview();
-        } catch (e) {
-          console.error("Error loading saved avatar:", e);
+        // Hide placeholder
+        placeholderText.style.display = 'none';
+        
+        // Create and add the image
+        const img = document.createElement('img');
+        img.src = savedAvatar;
+        img.id = 'preview-image';
+        avatarPreview.appendChild(img);
+        
+        // Store the current image
+        currentImage = savedAvatar;
+        
+        // Load saved settings if available
+        if (savedSettings) {
+          try {
+            const settings = JSON.parse(savedSettings);
+            
+            // Apply saved filter
+            if (settings.filter) {
+              currentFilter = settings.filter;
+              applyFilter(currentFilter);
+            }
+            
+            // Apply saved zoom
+            if (settings.zoom) {
+              zoomLevel = settings.zoom;
+              zoomSlider.value = zoomLevel;
+              handleZoom();
+            }
+          } catch (e) {
+            console.error('Error parsing saved settings:', e);
+          }
         }
+        
+        // Show crop controls
+        cropControls.classList.add('visible');
+        
+        // Enable save button
+        saveBtn.disabled = false;
+        
+        // Update filter previews
+        updateFilterPreviews();
       }
-    }
-    
-    // Update avatar preview based on current state
-    function updateAvatarPreview() {
-      // Set base (face) with skin tint
-      const baseLayer = document.getElementById('base-layer');
-      baseLayer.style.backgroundImage = `url('${avatarImages.face[avatar.face]}')`;
-      baseLayer.style.backgroundColor = avatar.skin;
-      
-      // Set hair layer
-      const hairLayer = document.getElementById('hair-layer');
-      if (avatar.hair === 'none') {
-        hairLayer.style.backgroundImage = 'none';
-      } else {
-        hairLayer.style.backgroundImage = `url('${avatarImages.hair[avatar.hair]}')`;
-        applyHairColor(hairLayer, avatar.hairColor);
-      }
-      
-      // Set eyes layer
-      const eyesLayer = document.getElementById('eyes-layer');
-      eyesLayer.style.backgroundImage = `url('${avatarImages.eyes[avatar.eyes]}')`;
-      
-      // Set mouth layer
-      const mouthLayer = document.getElementById('mouth-layer');
-      mouthLayer.style.backgroundImage = `url('${avatarImages.mouth[avatar.mouth]}')`;
-      
-      // Set accessory layer
-      const accessoryLayer = document.getElementById('accessory-layer');
-      if (avatar.accessory === 'none') {
-        accessoryLayer.style.backgroundImage = 'none';
-      } else {
-        accessoryLayer.style.backgroundImage = `url('${avatarImages.accessory[avatar.accessory]}')`;
-      }
-    }
-    
-    // Apply hair color effect 
-    function applyHairColor(element, color) {
-      // Use a combination of CSS filters to simulate hair color
-      switch(color) {
-        case "#090806": // Black
-          element.style.filter = "brightness(0.4)";
-          break;
-        case "#8D4A43": // Brown
-          element.style.filter = "sepia(0.8) hue-rotate(0deg) saturate(1.5) brightness(0.7)";
-          break;
-        case "#B55239": // Auburn/Red
-          element.style.filter = "sepia(0.6) hue-rotate(350deg) saturate(2) brightness(0.8)";
-          break;
-        case "#D6C4C2": // Gray
-          element.style.filter = "grayscale(1) brightness(0.85)";
-          break;
-        case "#F7F6F2": // White/Very light blonde
-          element.style.filter = "brightness(1.8) contrast(0.8) grayscale(0.5)";
-          break;
-        case "#F4D35E": // Blonde
-          element.style.filter = "sepia(0.4) hue-rotate(30deg) saturate(2) brightness(1.2)";
-          break;
-        default:
-          element.style.filter = "none";
-      }
-    }
-    
-    // Update the UI selections to match current avatar state
-    function updateUIFromState() {
-      // Update face selection
-      document.querySelectorAll(`.option[data-type="face"]`).forEach(option => {
-        option.classList.toggle('selected', option.getAttribute('data-value') === avatar.face);
-      });
-      
-      // Update skin color selection
-      document.querySelectorAll(`.color[data-type="skin"]`).forEach(color => {
-        color.classList.toggle('selected', color.getAttribute('data-value') === avatar.skin);
-      });
-      
-      // Update hair selection
-      document.querySelectorAll(`.option[data-type="hair"]`).forEach(option => {
-        option.classList.toggle('selected', option.getAttribute('data-value') === avatar.hair);
-      });
-      
-      // Update hair color selection
-      document.querySelectorAll(`.color[data-type="hairColor"]`).forEach(color => {
-        color.classList.toggle('selected', color.getAttribute('data-value') === avatar.hairColor);
-      });
-      
-      // Update eyes selection
-      document.querySelectorAll(`.option[data-type="eyes"]`).forEach(option => {
-        option.classList.toggle('selected', option.getAttribute('data-value') === avatar.eyes);
-      });
-      
-      // Update mouth selection
-      document.querySelectorAll(`.option[data-type="mouth"]`).forEach(option => {
-        option.classList.toggle('selected', option.getAttribute('data-value') === avatar.mouth);
-      });
-      
-      // Update accessory selection
-      document.querySelectorAll(`.option[data-type="accessory"]`).forEach(option => {
-        option.classList.toggle('selected', option.getAttribute('data-value') === avatar.accessory);
-      });
-    }
-    
-    // Helper function to get a random key from an object
-    function getRandomKey(obj) {
-      const keys = Object.keys(obj);
-      return keys[Math.floor(Math.random() * keys.length)];
-    }
-    
-    // Helper function to get a random skin color
-    function getRandomSkinColor() {
-      const skinColors = [
-        "#FDE3D5", "#F1C27D", "#E0AC69", "#C68642", "#8D5524", "#5C3518"
-      ];
-      return skinColors[Math.floor(Math.random() * skinColors.length)];
-    }
-    
-    // Helper function to get a random hair color
-    function getRandomHairColor() {
-      const hairColors = [
-        "#090806", "#8D4A43", "#B55239", "#D6C4C2", "#F7F6F2", "#F4D35E"
-      ];
-      return hairColors[Math.floor(Math.random() * hairColors.length)];
     }
     
     // Show toast message
-    function showToast(message) {
+    function showToast(message, isError = false) {
       const toast = document.getElementById('toast');
       toast.textContent = message;
+      toast.classList.toggle('error', isError);
       toast.classList.add('show');
       
       setTimeout(() => {

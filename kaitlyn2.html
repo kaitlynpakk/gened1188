@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Habit Harmony</title>
+  <style>
+@font-face {
+  font-family: 'Mansfield';
+  src: url('fonts/Mansfield-Black-iF66c703e45fe6e.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+.auth-box {
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  max-width: 600px; /* wider */
+  width: 90%;
+  margin: 2rem auto;
+}
+
+
+@font-face {
+  font-family: 'Mansfield';
+  src: url('fonts/Mansfield-Bold-iF66c703e473e0c.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+/* Fix #userTitle color in dark mode */
+.low-light #userTitle {
+  color: #ddddf7; /* Light lavender, very readable */
+}
+
+/* Fix small buttons (habit add/trash) in dark mode */
+.low-light .btn-small {
+  background: #6b21a8;
+  color: white;
+}
+.low-light .btn-small:hover {
+  background: #5a189a;
+}
+
+#onboarding {
+  min-height: 600px;
+  max-width: 1000px; /* 🌟 Add this line */
+  width: 90%; /* 🌟 Add this line */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-bottom: 2rem;
+  transition: min-height 0.3s ease;
+}
+#habitbot-response {
+  color: #555;
+}
+.low-light #habitbot-response {
+  color: #ddddf7;
+}
+
+
+
+#progressBar {
+  width: 100%;
+  margin: 1rem auto;
+}
+#quiz-step-1, #quiz-step-2, #quiz-step-3 {
+  width: 100%;
+  max-width: 1000px; /* match onboarding width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.low-light .calendar td {
+  background-color: #40407a; /* solid dark lavender background */
+  color: #f5f5f5;
+  border-radius: 8px;
+}
+
+
+.low-light .completed {
+  background: #8b5cf6; /* soft purple */
+  color: #1a1a1a;
+}
+
+.low-light .upcoming {
+  background: #6b21a8; /* deeper purple */
+  color: #1a1a1a;
+}
+
+.low-light .today {
+  background: #a78bfa; /* Softer lilac highlight for today */
+  color: #1a1a1a; /* Dark text on light highlight */
+}
+.low-light .btn-small {
+  background: #a78bfa; /* Softer lilac */
+  color: #1a1a1a; /* Dark icon color */
+  border: 1px solid #c4b5fd; /* Optional: subtle border */
+}
+.low-light .btn-small:hover {
+  background: #c4b5fd;
+}
+
+
+@font-face {
+  font-family: 'Mansfield';
+  src: url('fonts/Mansfield-Italic-iF66c703e4a6951.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+}
+
+ @font-face {
+  font-family: 'Mansfield';
+  src: url('fonts/Mansfield-Semi-Bold-iF66c703e4e3977.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('fonts/Satoshi-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('fonts/Satoshi-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('fonts/Satoshi-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('fonts/Satoshi-Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+}
+
+
+/* Layout */
+body {
+  font-family: 'Satoshi', sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #cfe0fc, #e2d4f9);
+  color: #333;
+  margin: 0;
+  padding: 24px;
+}
+
+h1, h2, h3 {
+  font-family: 'Mansfield', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+h1 {
+  font-size: 3.5rem;
+  font-weight: 900; /* Mansfield Black */
+}
+
+h2, h3 {
+  font-weight: 700; /* Mansfield Bold */
+}
+.card, .dashboard, .card * {
+  font-family: 'Satoshi', sans-serif;
+}
+
+
+main {
+  padding: 2rem;
+  width: 90%;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+section {
+  margin-bottom: 2rem;
+}
+
+header {
+  text-align: center;
+  padding: 2rem;
+  background: none;
+  border: none;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 3rem;
+  color: #6b21a8;
+}
+
+header p {
+  font-size: 1.25rem;
+  color: #555;
+}
+
+/* Buttons (global base for ALL buttons) */
+button {
+  font-family: 'Satoshi', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 1rem 2.5rem;
+  margin: 0.5rem 0;
+  border-radius: 12px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+  width: auto;
+  display: inline-block;
+}
+#quote {
+  font-family: 'Satoshi', sans-serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+
+/* Primary (Purple) Button */
+.button-primary {
+  background: #7c3aed;
+  color: white;
+}
+
+.button-primary:hover {
+  background: #6b21a8;
+}
+
+/* Green Buttons (only if needed) */
+.button-green {
+  background: #28b485;
+  color: white;
+}
+
+.button-green:hover {
+  background: #249e76;
+}
+
+/* Secondary Gray Buttons (optional) */
+.button-secondary {
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  font-weight: bold;
+}
+
+.button-secondary:hover {
+  background: #e0e0e0;
+}
+
+/* Link-style Buttons */
+.button-back-link {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: normal;
+}
+
+.button-back-link:hover {
+  color: #333;
+}
+
+
+/* Inputs & Selects */
+input, select {
+  font-size: 1rem;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+select {
+  appearance: none;
+  background-color: #ffffff;
+  color: #333;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath fill='%236b21a8' d='M7 10L0 0h14z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 12px;
+}
+
+select:focus {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
+/* Dashboard Card */
+.dashboard {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  margin-top: 2rem;
+  max-width: 1000px; /* ADD THIS */
+  width: 90%;         /* ADD THIS */
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  padding: 24px;
+  margin: 20px;
+  flex: 1 1 300px;
+  max-width: 360px;
+}
+@keyframes slideUpFade {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+h1, h2, h3 {
+  animation: slideUpFade 0.8s ease both;
+}
+
+
+
+/* Other Small Components */
+#progressBar {
+  height: 10px;
+  background: #e9d5ff;
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+#progressFill {
+  height: 100%;
+  background: #7c3aed;
+  width: 0;
+  transition: width 0.5s ease;
+}
+
+#habitList {
+  padding-left: 1rem;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.fade-out {
+  animation: fadeOut 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes fadeOut {
+  from {opacity: 1;}
+  to {opacity: 0;}
+}
+
+/* Popup */
+#welcomePopup h2 {
+  color: #7c3aed;
+}
+
+#welcomePopup p {
+  color: #666;
+}
+
+#welcomePopup button {
+  background: #7c3aed;
+  color: #fff;
+}
+
+#welcomePopup button:hover {
+  background: #6b21a8;
+}
+
+/* Mobile Floating Username */
+#userTitle {
+  position: fixed;
+  top: 10px;
+  left: 20px;
+  font-size: 1.2rem;
+  color: #6b21a8;
+  font-weight: bold;
+  display: none;
+  z-index: 1000;
+}
+
+/* Selected Quiz Buttons */
+#goal-buttons button.selected,
+#motivation-buttons button.selected,
+#shortterm-buttons button.selected {
+  background-color: #c4b5fd;
+  color: #1a1a1a;
+  font-weight: bold;
+  border: 2px solid #7c3aed;
+  transform: scale(1.05);
+}
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+h1, h2, h3 {
+  animation: popIn 0.6s ease-out;
+}
+body::before {
+  content: "";
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background-image: url('https://grainy-gradients.vercel.app/noise.png');
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 0;
+}
+body {
+  transition: background 0.5s ease, color 0.5s ease;
+}
+.low-light {
+  background: linear-gradient(to bottom right, #2c2c54, #40407a);
+  color: #f5f5f5;
+}
+
+.low-light h1 {
+  color: #c4b5fd; /* lighter, readable purple in dark mode */
+}
+
+.low-light h2, .low-light p {
+  color: #ddddf7; /* much lighter grayish-blue for better contrast */
+}
+
+.low-light .dashboard, .low-light .card {
+  background: #353567;
+  border: 1px solid #55558c;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+}
+
+.low-light button {
+  background: #575fcf;
+  color: #ffffff;
+}
+
+.low-light button:hover {
+  background: #4e54c8;
+}
+
+.low-light input, .low-light select {
+  background-color: #45457a;
+  color: #f5f5f5;
+  border: 1px solid #6666aa;
+}
+
+.low-light input::placeholder, .low-light select::placeholder {
+  color: #bbbbdd;
+}
+
+.low-light a {
+  color: #b4b4ff;
+}
+.low-light a:hover {
+  color: #ffffff;
+}
+
+h1 {
+  font-size: 3rem;
+  color: #6b21a8;
+  margin-bottom: 0.5rem;
+}
+h2, p {
+  color: #555;
+}
+.low-light .auth-box {
+  background: #2c2c54;
+  color: #f5f5f5;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+.card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  padding: 24px;
+  margin: 20px auto;
+  max-width: 500px;
+}
+.btn {
+  background: #7c3aed;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.btn-small {
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+input, textarea {
+  font-size: 1rem;
+}
+
+.input { border: 1px solid #ccc; padding: 8px; border-radius: 6px; flex: 1; }
+.flex { display: flex; align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.text-line { text-decoration: line-through; }
+.calendar {
+  margin: 0 auto;
+}
+.calendar td { padding: 8px; border-radius: 8px; }
+.today { background: #7c3aed; color: white; }
+.completed { background: #c4b5fd; color: white; }
+.upcoming { background: #e9d5ff; }
+ul { list-style: none; padding: 0; }
+input[type="checkbox"] { width: 16px; height: 16px; }
+
+.card {
+  animation: slideFadeIn 0.6s ease-out both;
+}
+
+@keyframes slideFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+#menuDropdown {
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+}
+.low-light .btn-small {
+  background: #a78bfa;
+  color: #2c2c54; /* Darker navy color for better contrast */
+  border: 1px solid #c4b5fd;
+}
+
+.low-light .btn-small:hover {
+  background: #c4b5fd;
+}
+#menuDropdown.open {
+  max-height: 500px; /* enough for all menu items */
+  opacity: 1;
+}
+input::placeholder, select::placeholder {
+  font-family: 'Satoshi', sans-serif;
+  font-style: italic;
+  font-weight: 300; /* Light */
+  color: #888;
+}
+header h1 {
+  text-align: center;
+}
+.low-light #menuDropdown {
+  background: #353567;
+  color: #f5f5f5;
+  border: 1px solid #55558c;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+}
+.low-light #menuDropdown button {
+  background: none;
+  color: #f5f5f5;
+  border-bottom: 1px solid #55558c;
+}
+.low-light #menuDropdown button:hover {
+  background: #4e54c8;
+}
+#menuDropdown {
+  transition: max-height 0.4s ease, opacity 0.4s ease, background-color 0.3s ease;
+}
+.spinner {
+  border: 4px solid #eee;
+  border-top: 4px solid #7c3aed;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  animation: spin 0.8s linear infinite;
+  margin: 1rem auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+#habit-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  line-height: 1.4;
+  font-size: 1rem;
+  flex-direction: column;
+}
+.card {
+  background: rgba(255, 255, 255, 0.8); /* transparent white */
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+  transition: all 0.3s ease-in-out;
+}
+.low-light .card {
+  background: rgba(53, 53, 103, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid #6b6ba8;
+}
+/* 🔍 Enlarge HabitBot & Motivation Corner content */
+.card[data-card-id="habitbot"] h3,
+.card[data-card-id="motivation-corner"] h3 {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.card[data-card-id="habitbot"] textarea,
+.card[data-card-id="motivation-corner"] #quote {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.card[data-card-id="motivation-corner"] #author {
+  font-size: 1rem;
+}
+#habitbotModal textarea {
+  font-size: 1.2rem;
+  padding: 1rem;
+  width: 100%;
+}
+
+#habitbotModal button.btn-small {
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+}
+
+#habitbotModal > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Social Feed Styles */
+#feed {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  padding: 10px 0;
+}
+
+.post {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  animation: slideFadeIn 0.6s ease-out both;
+}
+
+.low-light .post {
+  background: rgba(53, 53, 103, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid #6b6ba8;
+}
+
+.post:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+}
+
+.post img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 15px 0;
+  display: block;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.low-light .post-header {
+  border-bottom: 1px solid #6b6ba8;
+}
+
+.post-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e9d5ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #7c3aed;
+}
+
+.low-light .post-avatar {
+  background: #6b21a8;
+  color: #e9d5ff;
+}
+
+.post-title {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin: 0;
+  color: #333;
+}
+
+.low-light .post-title {
+  color: #ddddf7;
+}
+
+.post-rating {
+  background: #7c3aed;
+  color: white;
+  border-radius: 20px;
+  padding: 5px 15px;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.post-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #f44336;
+  padding: 5px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.post-delete:hover {
+  background: rgba(244, 67, 54, 0.1);
+  transform: scale(1.2);
+}
+
+.nav-btn {
+  background: white;
+  border: none;
+  padding: 12px 25px;
+  margin: 0 10px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.nav-btn:hover, .nav-btn.active {
+  background: #7c3aed;
+  color: white;
+  transform: translateY(-3px);
+}
+
+.low-light .nav-btn {
+  background: #353567;
+  color: #ddddf7;
+}
+
+.low-light .nav-btn:hover, .low-light .nav-btn.active {
+  background: #6b21a8;
+  color: white;
+}
+
+/* Upload button */
+label.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #7c3aed;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+label.btn:hover {
+  background: #6b21a8;
+}
+
+.low-light label.btn {
+  background: #575fcf;
+}
+
+.low-light label.btn:hover {
+  background: #4e54c8;
+}
+
+</style>
+
+</head>
+<body>
+  <input type="hidden" id="username" />
+  <div id="userTitle"></div>
+
+ <header>
+  <div style="position: absolute; top: 10px; right: 20px; display: flex; align-items: center; gap: 12px;">
+    <button id="themeToggle" style="background: none; border: none; font-size: 24px; cursor: pointer;">🌙</button>
+    <button id="menuButton" style="background: none; border: none; font-size: 28px; cursor: pointer;">☰</button>
+    <div id="menuDropdown" style="display: none; position: absolute; top: 50px; right: 20px; border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); overflow: hidden; z-index: 1000;">
+      <button onclick="showDashboard()" style="display: block; width: 100%; padding: 10px; background: none; border: none; text-align: left; cursor: pointer;">📊 Dashboard</button>
+      <button onclick="showSocialFeed()" style="display: block; width: 100%; padding: 10px; background: none; border: none; text-align: left; cursor: pointer;">🌐 Social Feed</button>
+      <button onclick="logoutUser()" style="display: block; width: 100%; padding: 10px; background: none; border: none; text-align: left; cursor: pointer;">🚪 Log Out</button>
+      <button onclick="resetGoals()" style="display: block; width: 100%; padding: 10px; background: none; border: none; text-align: left; cursor: pointer;">♻️ Reset Goals</button>
+      <button onclick="toggleTheme()" style="display: block; width: 100%; padding: 10px; background: none; border: none; text-align: left; cursor: pointer;">🎨 Toggle Theme</button>
+    </div>
+  </div>
+  <h1>🌱 Habit Harmony <span id="time-icon">🌞</span></h1>
+  <p id="datetime"></p>
+</header>
+
+<!-- Add a navigation bar below the header -->
+<nav id="main-nav" style="display: none; text-align: center; margin-bottom: 20px;">
+  <button onclick="showDashboard()" class="nav-btn active" id="dashboard-btn">Dashboard</button>
+  <button onclick="showSocialFeed()" class="nav-btn" id="social-btn">Social Feed</button>
+</nav>
+
+  <main>
+    <section id="auth-section">
+      <div class="auth-box">
+        <h2>Welcome to Habit Builder 👋</h2>
+        <p>Create an account to start your journey:</p>
+        <input type="text" id="auth-name" placeholder="Username" /><br />
+        <div class="flex gap-2">
+          <input type="password" id="auth-password" class="input" placeholder="Create a password" onkeyup="detectCapsLock(event, 'caps-warning-auth-password')" oninput="validatePasswordRules(this.value)">
+          <button type="button" class="btn-small" onclick="togglePassword('auth-password')">👁️</button>
+        </div>
+
+        <p id="caps-warning-auth-password" style="color:red;display:none;">⚠️ Caps Lock is ON</p>
+        <ul id="password-rules" style="font-size:0.9rem; color:gray; list-style: none; margin-top: 8px;">
+          <li id="rule-length">❌ 8+ characters</li>
+          <li id="rule-uppercase">❌ 1 uppercase letter</li>
+          <li id="rule-number">❌ 1 number</li>
+        </ul>
+        <div class="flex gap-2">
+          <input type="password" id="auth-confirm-password" class="input" placeholder="Confirm your password" />
+          <button type="button" class="btn-small" onclick="togglePassword('auth-confirm-password')">👁️</button>
+        </div>
+
+        <p id="caps-warning-auth-confirm-password" style="color:red;display:none;">⚠️ Caps Lock is ON</p>
+        <select id="security-question">
+          <option value="" disabled selected>Select a security question</option>
+          <option value="What was your childhood nickname?">What was your childhood nickname?</option>
+          <option value="In what city were you born?">In what city were you born?</option>
+          <option value="What is your favorite movie?">What is your favorite movie?</option>
+          <option value="What was your first pet's name?">What was your first pet's name?</option>
+          <option value="What elementary school did you attend?">What elementary school did you attend?</option>
+          <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+          <option value="What was your dream job as a child?">What was your dream job as a child?</option>
+          <option value="What is your favorite food?">What is your favorite food?</option>
+          <option value="What is your favorite book?">What is your favorite book?</option>
+          <option value="What was the make of your first car?">What was the make of your first car?</option>
+        </select><br />
+
+        <input type="text" id="security-answer" placeholder="Answer to your question" /><br />
+        <button onclick="completeSignup()">Create Account</button>
+        <p style="text-align: center;">
+          Already have an account? <a href="#" onclick="showLogin()">Log in</a>
+        </p>
+      </div>
+    </section>
+    
+    <section id="login-section" style="display: none;">
+      <div class="auth-box">
+        <h2>Welcome Back 👋</h2>
+        <p>Log in to

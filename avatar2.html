@@ -49,6 +49,9 @@
       height: 100%;
       top: 0;
       left: 0;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
     }
     
     .tabs {
@@ -99,6 +102,12 @@
       cursor: pointer;
       text-align: center;
       border: 2px solid transparent;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .option:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     
     .option.selected {
@@ -106,10 +115,15 @@
       box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
     }
     
-    .option img {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
+    .option-image {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+      display: block;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      border-radius: 10px;
     }
     
     .color-options {
@@ -126,6 +140,11 @@
       border-radius: 50%;
       cursor: pointer;
       border: 3px solid transparent;
+      transition: transform 0.2s;
+    }
+    
+    .color:hover {
+      transform: scale(1.1);
     }
     
     .color.selected {
@@ -147,6 +166,7 @@
       padding: 12px 24px;
       font-size: 16px;
       cursor: pointer;
+      transition: background 0.2s;
     }
     
     button:hover {
@@ -180,7 +200,7 @@
     <div class="avatar-card">
       <h2>Your Avatar</h2>
       <div class="avatar-preview">
-        <div id="face-layer" class="avatar-layer"></div>
+        <div id="base-layer" class="avatar-layer"></div>
         <div id="hair-layer" class="avatar-layer"></div>
         <div id="eyes-layer" class="avatar-layer"></div>
         <div id="mouth-layer" class="avatar-layer"></div>
@@ -208,15 +228,15 @@
         <h3>Face Shape</h3>
         <div class="option-grid">
           <div class="option selected" data-type="face" data-value="round">
-            <img src="https://i.ibb.co/K9zWRTJ/round-face.png" alt="Round">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/SQpoPYH.png');"></div>
             <p>Round</p>
           </div>
           <div class="option" data-type="face" data-value="square">
-            <img src="https://i.ibb.co/wzXtBRd/square-face.png" alt="Square">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/SWSJ9gx.png');"></div>
             <p>Square</p>
           </div>
           <div class="option" data-type="face" data-value="heart">
-            <img src="https://i.ibb.co/yg6VLXb/heart-face.png" alt="Heart">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/xQtACeE.png');"></div>
             <p>Heart</p>
           </div>
         </div>
@@ -237,27 +257,27 @@
         <h3>Hair Style</h3>
         <div class="option-grid">
           <div class="option selected" data-type="hair" data-value="short">
-            <img src="https://i.ibb.co/XyxR79X/short.png" alt="Short">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/pZdUxWt.png');"></div>
             <p>Short</p>
           </div>
           <div class="option" data-type="hair" data-value="medium">
-            <img src="https://i.ibb.co/GFfPPS8/medium.png" alt="Medium">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/jGkpbVB.png');"></div>
             <p>Medium</p>
           </div>
           <div class="option" data-type="hair" data-value="long">
-            <img src="https://i.ibb.co/Js5FZd3/long.png" alt="Long">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/CRP7KYE.png');"></div>
             <p>Long</p>
           </div>
           <div class="option" data-type="hair" data-value="curly">
-            <img src="https://i.ibb.co/hM5txtg/curly.png" alt="Curly">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/S37kQDO.png');"></div>
             <p>Curly</p>
           </div>
           <div class="option" data-type="hair" data-value="bun">
-            <img src="https://i.ibb.co/X2Nq6vV/bun.png" alt="Bun">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/CT1ZHZp.png');"></div>
             <p>Bun</p>
           </div>
           <div class="option" data-type="hair" data-value="none">
-            <img src="https://i.ibb.co/9pvCjD3/bald.png" alt="None">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/KcbDPh2.png');"></div>
             <p>None</p>
           </div>
         </div>
@@ -278,15 +298,15 @@
         <h3>Eyes</h3>
         <div class="option-grid">
           <div class="option selected" data-type="eyes" data-value="default">
-            <img src="https://i.ibb.co/bvDqQZ7/default-eyes.png" alt="Default">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/JYJgFYz.png');"></div>
             <p>Default</p>
           </div>
           <div class="option" data-type="eyes" data-value="happy">
-            <img src="https://i.ibb.co/CJWsn8D/happy-eyes.png" alt="Happy">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/DURGSWd.png');"></div>
             <p>Happy</p>
           </div>
           <div class="option" data-type="eyes" data-value="wink">
-            <img src="https://i.ibb.co/sRW6XnS/wink-eyes.png" alt="Wink">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/LAcvCsF.png');"></div>
             <p>Wink</p>
           </div>
         </div>
@@ -294,15 +314,15 @@
         <h3>Mouth</h3>
         <div class="option-grid">
           <div class="option selected" data-type="mouth" data-value="smile">
-            <img src="https://i.ibb.co/7Wq83QH/smile.png" alt="Smile">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/YOOCLmR.png');"></div>
             <p>Smile</p>
           </div>
           <div class="option" data-type="mouth" data-value="laugh">
-            <img src="https://i.ibb.co/DGpF3gF/laugh.png" alt="Laugh">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/8fKRhGt.png');"></div>
             <p>Laugh</p>
           </div>
           <div class="option" data-type="mouth" data-value="neutral">
-            <img src="https://i.ibb.co/PhTRNZY/neutral.png" alt="Neutral">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/dqvB8wZ.png');"></div>
             <p>Neutral</p>
           </div>
         </div>
@@ -313,23 +333,23 @@
         <h3>Head Accessories</h3>
         <div class="option-grid">
           <div class="option selected" data-type="accessory" data-value="none">
-            <img src="https://i.ibb.co/ZGp6Kv2/none.png" alt="None">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/KcbDPh2.png');"></div>
             <p>None</p>
           </div>
           <div class="option" data-type="accessory" data-value="glasses">
-            <img src="https://i.ibb.co/Lx1bh0z/glasses.png" alt="Glasses">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/Hgr1Pxj.png');"></div>
             <p>Glasses</p>
           </div>
           <div class="option" data-type="accessory" data-value="hat">
-            <img src="https://i.ibb.co/SNQnkBS/hat.png" alt="Hat">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/dQ62MHl.png');"></div>
             <p>Hat</p>
           </div>
           <div class="option" data-type="accessory" data-value="flower">
-            <img src="https://i.ibb.co/Qny2v5J/flower.png" alt="Flower">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/OUTStsV.png');"></div>
             <p>Flower</p>
           </div>
           <div class="option" data-type="accessory" data-value="headphones">
-            <img src="https://i.ibb.co/LCYqvD0/headphones.png" alt="Headphones">
+            <div class="option-image" style="background-image: url('https://i.imgur.com/sMt3BEZ.png');"></div>
             <p>Headphones</p>
           </div>
         </div>
@@ -351,42 +371,45 @@
       accessory: "none"
     };
     
-    // Avatar images mapping
+    // Avatar images mapping - actual images
     const avatarImages = {
       face: {
-        round: "https://i.ibb.co/K9zWRTJ/round-face.png",
-        square: "https://i.ibb.co/wzXtBRd/square-face.png",
-        heart: "https://i.ibb.co/yg6VLXb/heart-face.png"
+        round: "https://i.imgur.com/SQpoPYH.png",
+        square: "https://i.imgur.com/SWSJ9gx.png",
+        heart: "https://i.imgur.com/xQtACeE.png"
       },
       hair: {
-        short: "https://i.ibb.co/XyxR79X/short.png",
-        medium: "https://i.ibb.co/GFfPPS8/medium.png",
-        long: "https://i.ibb.co/Js5FZd3/long.png",
-        curly: "https://i.ibb.co/hM5txtg/curly.png",
-        bun: "https://i.ibb.co/X2Nq6vV/bun.png",
-        none: "https://i.ibb.co/9pvCjD3/bald.png"
+        short: "https://i.imgur.com/pZdUxWt.png",
+        medium: "https://i.imgur.com/jGkpbVB.png",
+        long: "https://i.imgur.com/CRP7KYE.png",
+        curly: "https://i.imgur.com/S37kQDO.png",
+        bun: "https://i.imgur.com/CT1ZHZp.png",
+        none: "https://i.imgur.com/KcbDPh2.png"
       },
       eyes: {
-        default: "https://i.ibb.co/bvDqQZ7/default-eyes.png",
-        happy: "https://i.ibb.co/CJWsn8D/happy-eyes.png",
-        wink: "https://i.ibb.co/sRW6XnS/wink-eyes.png"
+        default: "https://i.imgur.com/JYJgFYz.png",
+        happy: "https://i.imgur.com/DURGSWd.png",
+        wink: "https://i.imgur.com/LAcvCsF.png"
       },
       mouth: {
-        smile: "https://i.ibb.co/7Wq83QH/smile.png",
-        laugh: "https://i.ibb.co/DGpF3gF/laugh.png",
-        neutral: "https://i.ibb.co/PhTRNZY/neutral.png"
+        smile: "https://i.imgur.com/YOOCLmR.png",
+        laugh: "https://i.imgur.com/8fKRhGt.png",
+        neutral: "https://i.imgur.com/dqvB8wZ.png"
       },
       accessory: {
-        none: "https://i.ibb.co/ZGp6Kv2/none.png",
-        glasses: "https://i.ibb.co/Lx1bh0z/glasses.png",
-        hat: "https://i.ibb.co/SNQnkBS/hat.png",
-        flower: "https://i.ibb.co/Qny2v5J/flower.png",
-        headphones: "https://i.ibb.co/LCYqvD0/headphones.png"
+        none: "",
+        glasses: "https://i.imgur.com/Hgr1Pxj.png",
+        hat: "https://i.imgur.com/dQ62MHl.png",
+        flower: "https://i.imgur.com/OUTStsV.png",
+        headphones: "https://i.imgur.com/sMt3BEZ.png"
       }
     };
     
     // Initialize the avatar preview
     updateAvatarPreview();
+    
+    // Try to load saved avatar
+    loadSavedAvatar();
     
     // Tab switching
     document.querySelectorAll('.tab').forEach(tab => {
@@ -476,38 +499,78 @@
       showToast('Avatar saved successfully!');
     });
     
+    // Load saved avatar if available
+    function loadSavedAvatar() {
+      const savedAvatar = localStorage.getItem('savedAvatar');
+      if (savedAvatar) {
+        try {
+          const parsedAvatar = JSON.parse(savedAvatar);
+          Object.assign(avatar, parsedAvatar);
+          updateUIFromState();
+          updateAvatarPreview();
+        } catch (e) {
+          console.error("Error loading saved avatar:", e);
+        }
+      }
+    }
+    
     // Update avatar preview based on current state
     function updateAvatarPreview() {
-      // Set face with skin color
-      const faceLayer = document.getElementById('face-layer');
-      faceLayer.style.backgroundImage = `url('${avatarImages.face[avatar.face]}')`;
-      faceLayer.style.backgroundColor = avatar.skin;
+      // Set base (face) with skin tint
+      const baseLayer = document.getElementById('base-layer');
+      baseLayer.style.backgroundImage = `url('${avatarImages.face[avatar.face]}')`;
+      baseLayer.style.backgroundColor = avatar.skin;
       
-      // Set hair with hair color
+      // Set hair layer
       const hairLayer = document.getElementById('hair-layer');
       if (avatar.hair === 'none') {
         hairLayer.style.backgroundImage = 'none';
       } else {
         hairLayer.style.backgroundImage = `url('${avatarImages.hair[avatar.hair]}')`;
-        // For a real app, you would use images that can be colored or apply filters
-        // This is a simplified approach
-        hairLayer.style.filter = getHairColorFilter(avatar.hairColor);
+        applyHairColor(hairLayer, avatar.hairColor);
       }
       
-      // Set eyes
+      // Set eyes layer
       const eyesLayer = document.getElementById('eyes-layer');
       eyesLayer.style.backgroundImage = `url('${avatarImages.eyes[avatar.eyes]}')`;
       
-      // Set mouth
+      // Set mouth layer
       const mouthLayer = document.getElementById('mouth-layer');
       mouthLayer.style.backgroundImage = `url('${avatarImages.mouth[avatar.mouth]}')`;
       
-      // Set accessory
+      // Set accessory layer
       const accessoryLayer = document.getElementById('accessory-layer');
       if (avatar.accessory === 'none') {
         accessoryLayer.style.backgroundImage = 'none';
       } else {
         accessoryLayer.style.backgroundImage = `url('${avatarImages.accessory[avatar.accessory]}')`;
+      }
+    }
+    
+    // Apply hair color effect 
+    function applyHairColor(element, color) {
+      // Use a combination of CSS filters to simulate hair color
+      switch(color) {
+        case "#090806": // Black
+          element.style.filter = "brightness(0.4)";
+          break;
+        case "#8D4A43": // Brown
+          element.style.filter = "sepia(0.8) hue-rotate(0deg) saturate(1.5) brightness(0.7)";
+          break;
+        case "#B55239": // Auburn/Red
+          element.style.filter = "sepia(0.6) hue-rotate(350deg) saturate(2) brightness(0.8)";
+          break;
+        case "#D6C4C2": // Gray
+          element.style.filter = "grayscale(1) brightness(0.85)";
+          break;
+        case "#F7F6F2": // White/Very light blonde
+          element.style.filter = "brightness(1.8) contrast(0.8) grayscale(0.5)";
+          break;
+        case "#F4D35E": // Blonde
+          element.style.filter = "sepia(0.4) hue-rotate(30deg) saturate(2) brightness(1.2)";
+          break;
+        default:
+          element.style.filter = "none";
       }
     }
     
@@ -569,21 +632,6 @@
         "#090806", "#8D4A43", "#B55239", "#D6C4C2", "#F7F6F2", "#F4D35E"
       ];
       return hairColors[Math.floor(Math.random() * hairColors.length)];
-    }
-    
-    // Helper function to create a color filter effect for hair
-    function getHairColorFilter(color) {
-      // This is a simplified approach - for a real app you'd use more sophisticated techniques
-      // or pre-colored assets for hair
-      switch(color) {
-        case "#090806": return "brightness(0.7)"; // Black
-        case "#8D4A43": return "sepia(0.5) hue-rotate(0deg)"; // Brown
-        case "#B55239": return "sepia(0.6) hue-rotate(0deg) saturate(1.5)"; // Auburn
-        case "#D6C4C2": return "sepia(0.2) brightness(1.3)"; // Gray
-        case "#F7F6F2": return "brightness(1.5) contrast(0.8)"; // White/Blonde
-        case "#F4D35E": return "sepia(0.8) hue-rotate(30deg) saturate(1.8)"; // Blonde
-        default: return "none";
-      }
     }
     
     // Show toast message

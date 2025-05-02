@@ -1,422 +1,601 @@
-// Get username from local storage
-let userName = localStorage.getItem('currentUser') || "TestUser";
-document.getElementById('current-user').textContent = userName;
-
-// Avatar state
-const avatarState = {
-  face: 'round',
-  skinColor: '#FDE3D5',
-  hair: 'short',
-  hairColor: '#090806',
-  eyes: 'round',
-  eyeColor: '#634e34',
-  mouth: 'smile',
-  accessory: 'none'
-};
-
-// Initialize avatar preview
-updateAvatarPreview();
-
-// Load existing avatar if available
-function loadExistingAvatar() {
-  const savedAvatar = localStorage.getItem('userAvatar');
-  if (savedAvatar) {
-    try {
-      const savedAvatarData = JSON.parse(savedAvatar);
-      Object.assign(avatarState, savedAvatarData);
-      updateUIFromState();
-    } catch (e) {
-      console.error("Error loading saved avatar:", e);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Harmony - Avatar Creator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #cfe0fc, #e2d4f9);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
     }
-  }
-}
-
-// Call this on page load
-loadExistingAvatar();
-
-// Tab switching functionality
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', function() {
-    // Remove active class from all tabs
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     
-    // Add active class to clicked tab
-    this.classList.add('active');
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
     
-    // Show corresponding tab content
-    const tabId = this.getAttribute('data-tab');
-    document.getElementById(tabId).classList.add('active');
-  });
-});
-
-// Part selection functionality
-document.querySelectorAll('.avatar-part').forEach(part => {
-  part.addEventListener('click', function() {
-    const type = this.getAttribute('data-type');
-    const id = this.getAttribute('data-id');
+    h1, h2, h3 {
+      color: #6b21a8;
+      text-align: center;
+    }
     
-    // Remove selected class from siblings
-    document.querySelectorAll(`.avatar-part[data-type="${type}"]`).forEach(p => p.classList.remove('selected'));
+    .avatar-card {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 20px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+      padding: 24px;
+      margin: 20px auto;
+    }
     
-    // Add selected class to this part
-    this.classList.add('selected');
+    .avatar-preview {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: #fff;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      border: 4px solid #7c3aed;
+    }
     
-    // Update avatar state
-    if (type === 'face') avatarState.face = id;
-    else if (type === 'hair') avatarState.hair = id;
-    else if (type === 'eyes') avatarState.eyes = id;
-    else if (type === 'mouth') avatarState.mouth = id;
-    else if (type === 'accessory') avatarState.accessory = id;
+    .avatar-layer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
     
+    .tabs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .tab {
+      background: #f0f0f0;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      border: none;
+      font-size: 16px;
+    }
+    
+    .tab.active {
+      background: #7c3aed;
+      color: white;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 15px;
+      margin-top: 10px;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 15px 0;
+    }
+    
+    .option {
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      border: 2px solid transparent;
+    }
+    
+    .option.selected {
+      border-color: #7c3aed;
+      box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+    }
+    
+    .option img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+    
+    .color-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 15px 0;
+      justify-content: center;
+    }
+    
+    .color {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+    }
+    
+    .color.selected {
+      border-color: black;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    button {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background: #6b21a8;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #28a745;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌱 Habit Harmony Avatar Creator</h1>
+    
+    <div class="avatar-card">
+      <h2>Your Avatar</h2>
+      <div class="avatar-preview">
+        <div id="face-layer" class="avatar-layer"></div>
+        <div id="hair-layer" class="avatar-layer"></div>
+        <div id="eyes-layer" class="avatar-layer"></div>
+        <div id="mouth-layer" class="avatar-layer"></div>
+        <div id="accessory-layer" class="avatar-layer"></div>
+      </div>
+      
+      <div class="action-buttons">
+        <button id="random-btn">Random Avatar</button>
+        <button id="save-btn">Save Avatar</button>
+      </div>
+    </div>
+    
+    <div class="avatar-card">
+      <h2>Customize Your Avatar</h2>
+      
+      <div class="tabs">
+        <button class="tab active" data-tab="face">Face</button>
+        <button class="tab" data-tab="hair">Hair</button>
+        <button class="tab" data-tab="features">Features</button>
+        <button class="tab" data-tab="accessories">Accessories</button>
+      </div>
+      
+      <!-- Face Tab -->
+      <div id="face-tab" class="tab-content active">
+        <h3>Face Shape</h3>
+        <div class="option-grid">
+          <div class="option selected" data-type="face" data-value="round">
+            <img src="https://i.ibb.co/K9zWRTJ/round-face.png" alt="Round">
+            <p>Round</p>
+          </div>
+          <div class="option" data-type="face" data-value="square">
+            <img src="https://i.ibb.co/wzXtBRd/square-face.png" alt="Square">
+            <p>Square</p>
+          </div>
+          <div class="option" data-type="face" data-value="heart">
+            <img src="https://i.ibb.co/yg6VLXb/heart-face.png" alt="Heart">
+            <p>Heart</p>
+          </div>
+        </div>
+        
+        <h3>Skin Color</h3>
+        <div class="color-options">
+          <div class="color selected" style="background-color: #FDE3D5;" data-type="skin" data-value="#FDE3D5"></div>
+          <div class="color" style="background-color: #F1C27D;" data-type="skin" data-value="#F1C27D"></div>
+          <div class="color" style="background-color: #E0AC69;" data-type="skin" data-value="#E0AC69"></div>
+          <div class="color" style="background-color: #C68642;" data-type="skin" data-value="#C68642"></div>
+          <div class="color" style="background-color: #8D5524;" data-type="skin" data-value="#8D5524"></div>
+          <div class="color" style="background-color: #5C3518;" data-type="skin" data-value="#5C3518"></div>
+        </div>
+      </div>
+      
+      <!-- Hair Tab -->
+      <div id="hair-tab" class="tab-content">
+        <h3>Hair Style</h3>
+        <div class="option-grid">
+          <div class="option selected" data-type="hair" data-value="short">
+            <img src="https://i.ibb.co/XyxR79X/short.png" alt="Short">
+            <p>Short</p>
+          </div>
+          <div class="option" data-type="hair" data-value="medium">
+            <img src="https://i.ibb.co/GFfPPS8/medium.png" alt="Medium">
+            <p>Medium</p>
+          </div>
+          <div class="option" data-type="hair" data-value="long">
+            <img src="https://i.ibb.co/Js5FZd3/long.png" alt="Long">
+            <p>Long</p>
+          </div>
+          <div class="option" data-type="hair" data-value="curly">
+            <img src="https://i.ibb.co/hM5txtg/curly.png" alt="Curly">
+            <p>Curly</p>
+          </div>
+          <div class="option" data-type="hair" data-value="bun">
+            <img src="https://i.ibb.co/X2Nq6vV/bun.png" alt="Bun">
+            <p>Bun</p>
+          </div>
+          <div class="option" data-type="hair" data-value="none">
+            <img src="https://i.ibb.co/9pvCjD3/bald.png" alt="None">
+            <p>None</p>
+          </div>
+        </div>
+        
+        <h3>Hair Color</h3>
+        <div class="color-options">
+          <div class="color selected" style="background-color: #090806;" data-type="hairColor" data-value="#090806"></div>
+          <div class="color" style="background-color: #8D4A43;" data-type="hairColor" data-value="#8D4A43"></div>
+          <div class="color" style="background-color: #B55239;" data-type="hairColor" data-value="#B55239"></div>
+          <div class="color" style="background-color: #D6C4C2;" data-type="hairColor" data-value="#D6C4C2"></div>
+          <div class="color" style="background-color: #F7F6F2;" data-type="hairColor" data-value="#F7F6F2"></div>
+          <div class="color" style="background-color: #F4D35E;" data-type="hairColor" data-value="#F4D35E"></div>
+        </div>
+      </div>
+      
+      <!-- Features Tab -->
+      <div id="features-tab" class="tab-content">
+        <h3>Eyes</h3>
+        <div class="option-grid">
+          <div class="option selected" data-type="eyes" data-value="default">
+            <img src="https://i.ibb.co/bvDqQZ7/default-eyes.png" alt="Default">
+            <p>Default</p>
+          </div>
+          <div class="option" data-type="eyes" data-value="happy">
+            <img src="https://i.ibb.co/CJWsn8D/happy-eyes.png" alt="Happy">
+            <p>Happy</p>
+          </div>
+          <div class="option" data-type="eyes" data-value="wink">
+            <img src="https://i.ibb.co/sRW6XnS/wink-eyes.png" alt="Wink">
+            <p>Wink</p>
+          </div>
+        </div>
+        
+        <h3>Mouth</h3>
+        <div class="option-grid">
+          <div class="option selected" data-type="mouth" data-value="smile">
+            <img src="https://i.ibb.co/7Wq83QH/smile.png" alt="Smile">
+            <p>Smile</p>
+          </div>
+          <div class="option" data-type="mouth" data-value="laugh">
+            <img src="https://i.ibb.co/DGpF3gF/laugh.png" alt="Laugh">
+            <p>Laugh</p>
+          </div>
+          <div class="option" data-type="mouth" data-value="neutral">
+            <img src="https://i.ibb.co/PhTRNZY/neutral.png" alt="Neutral">
+            <p>Neutral</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Accessories Tab -->
+      <div id="accessories-tab" class="tab-content">
+        <h3>Head Accessories</h3>
+        <div class="option-grid">
+          <div class="option selected" data-type="accessory" data-value="none">
+            <img src="https://i.ibb.co/ZGp6Kv2/none.png" alt="None">
+            <p>None</p>
+          </div>
+          <div class="option" data-type="accessory" data-value="glasses">
+            <img src="https://i.ibb.co/Lx1bh0z/glasses.png" alt="Glasses">
+            <p>Glasses</p>
+          </div>
+          <div class="option" data-type="accessory" data-value="hat">
+            <img src="https://i.ibb.co/SNQnkBS/hat.png" alt="Hat">
+            <p>Hat</p>
+          </div>
+          <div class="option" data-type="accessory" data-value="flower">
+            <img src="https://i.ibb.co/Qny2v5J/flower.png" alt="Flower">
+            <p>Flower</p>
+          </div>
+          <div class="option" data-type="accessory" data-value="headphones">
+            <img src="https://i.ibb.co/LCYqvD0/headphones.png" alt="Headphones">
+            <p>Headphones</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="toast" class="toast"></div>
+  
+  <script>
+    // Avatar state
+    const avatar = {
+      face: "round",
+      skin: "#FDE3D5",
+      hair: "short",
+      hairColor: "#090806",
+      eyes: "default",
+      mouth: "smile",
+      accessory: "none"
+    };
+    
+    // Avatar images mapping
+    const avatarImages = {
+      face: {
+        round: "https://i.ibb.co/K9zWRTJ/round-face.png",
+        square: "https://i.ibb.co/wzXtBRd/square-face.png",
+        heart: "https://i.ibb.co/yg6VLXb/heart-face.png"
+      },
+      hair: {
+        short: "https://i.ibb.co/XyxR79X/short.png",
+        medium: "https://i.ibb.co/GFfPPS8/medium.png",
+        long: "https://i.ibb.co/Js5FZd3/long.png",
+        curly: "https://i.ibb.co/hM5txtg/curly.png",
+        bun: "https://i.ibb.co/X2Nq6vV/bun.png",
+        none: "https://i.ibb.co/9pvCjD3/bald.png"
+      },
+      eyes: {
+        default: "https://i.ibb.co/bvDqQZ7/default-eyes.png",
+        happy: "https://i.ibb.co/CJWsn8D/happy-eyes.png",
+        wink: "https://i.ibb.co/sRW6XnS/wink-eyes.png"
+      },
+      mouth: {
+        smile: "https://i.ibb.co/7Wq83QH/smile.png",
+        laugh: "https://i.ibb.co/DGpF3gF/laugh.png",
+        neutral: "https://i.ibb.co/PhTRNZY/neutral.png"
+      },
+      accessory: {
+        none: "https://i.ibb.co/ZGp6Kv2/none.png",
+        glasses: "https://i.ibb.co/Lx1bh0z/glasses.png",
+        hat: "https://i.ibb.co/SNQnkBS/hat.png",
+        flower: "https://i.ibb.co/Qny2v5J/flower.png",
+        headphones: "https://i.ibb.co/LCYqvD0/headphones.png"
+      }
+    };
+    
+    // Initialize the avatar preview
     updateAvatarPreview();
-  });
-});
-
-// Color swatch selection functionality
-document.querySelectorAll('.color-swatch').forEach(swatch => {
-  swatch.addEventListener('click', function() {
-    const color = this.getAttribute('data-color');
     
-    // Find parent color picker
-    const colorPicker = this.parentElement;
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remove active class from all tabs and tab content
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        tab.classList.add('active');
+        
+        // Show corresponding tab content
+        const tabId = tab.getAttribute('data-tab') + '-tab';
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
     
-    // Remove selected class from siblings
-    colorPicker.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+    // Option selection
+    document.querySelectorAll('.option').forEach(option => {
+      option.addEventListener('click', () => {
+        const type = option.getAttribute('data-type');
+        const value = option.getAttribute('data-value');
+        
+        // Remove selected class from all options of the same type
+        document.querySelectorAll(`.option[data-type="${type}"]`).forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked option
+        option.classList.add('selected');
+        
+        // Update avatar state
+        avatar[type] = value;
+        
+        // Update avatar preview
+        updateAvatarPreview();
+      });
+    });
     
-    // Add selected class to this swatch
-    this.classList.add('selected');
+    // Color selection
+    document.querySelectorAll('.color').forEach(color => {
+      color.addEventListener('click', () => {
+        const type = color.getAttribute('data-type');
+        const value = color.getAttribute('data-value');
+        
+        // Remove selected class from all colors of the same type
+        document.querySelectorAll(`.color[data-type="${type}"]`).forEach(c => {
+          c.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked color
+        color.classList.add('selected');
+        
+        // Update avatar state
+        avatar[type] = value;
+        
+        // Update avatar preview
+        updateAvatarPreview();
+      });
+    });
     
-    // Update avatar state based on parent color picker id
-    if (colorPicker.id === 'skin-colors') avatarState.skinColor = color;
-    else if (colorPicker.id === 'hair-colors') avatarState.hairColor = color;
-    else if (colorPicker.id === 'eye-colors') avatarState.eyeColor = color;
-    
-    updateAvatarPreview();
-  });
-});
-
-// Save avatar button click
-document.getElementById('save-avatar').addEventListener('click', function() {
-  // Save avatar state to local storage
-  localStorage.setItem('userAvatar', JSON.stringify(avatarState));
-  
-  // Generate a simple avatar representation as SVG
-  const avatarSVG = generateAvatarSVG();
-  
-  // Convert SVG to data URL for storage
-  const svgBlob = new Blob([avatarSVG], {type: 'image/svg+xml'});
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    localStorage.setItem('userAvatarImage', e.target.result);
-    showToast('Your avatar has been saved!', 'success');
-  };
-  reader.readAsDataURL(svgBlob);
-});
-
-// Random avatar button click
-document.getElementById('random-avatar').addEventListener('click', function() {
-  // Generate random avatar state
-  const randomAvatar = {
-    face: getRandomItem(['round', 'oval', 'square']),
-    skinColor: getRandomItem(['#FDE3D5', '#F1C27D', '#E0AC69', '#C68642', '#8D5524', '#5C3518']),
-    hair: getRandomItem(['short', 'medium', 'long', 'curly', 'bald']),
-    hairColor: getRandomItem(['#090806', '#8D4A43', '#B55239', '#D6C4C2', '#DECBC6', '#F7F6F2']),
-    eyes: getRandomItem(['round', 'almond', 'wide']),
-    eyeColor: getRandomItem(['#634e34', '#2e536f', '#285c4d', '#3a3839', '#7c4b4b', '#8a5a83']),
-    mouth: getRandomItem(['smile', 'neutral', 'laugh']),
-    accessory: getRandomItem(['none', 'glasses', 'earrings', 'hat'])
-  };
-  
-  // Update avatar state
-  Object.assign(avatarState, randomAvatar);
-  
-  // Update UI to reflect new state
-  updateUIFromState();
-  
-  // Update preview
-  updateAvatarPreview();
-  
-  showToast('Created a random avatar!', 'success');
-});
-
-function getRandomItem(array) {
-  return array[Math.floor(Math.random() * array.length)];
-}
-
-function updateUIFromState() {
-  // Update face shape selection
-  document.querySelectorAll(`.avatar-part[data-type="face"]`).forEach(part => {
-    part.classList.toggle('selected', part.getAttribute('data-id') === avatarState.face);
-  });
-  
-  // Update skin color selection
-  document.querySelectorAll('#skin-colors .color-swatch').forEach(swatch => {
-    swatch.classList.toggle('selected', swatch.getAttribute('data-color') === avatarState.skinColor);
-  });
-  
-  // Update hair style selection
-  document.querySelectorAll(`.avatar-part[data-type="hair"]`).forEach(part => {
-    part.classList.toggle('selected', part.getAttribute('data-id') === avatarState.hair);
-  });
-  
-  // Update hair color selection
-  document.querySelectorAll('#hair-colors .color-swatch').forEach(swatch => {
-    swatch.classList.toggle('selected', swatch.getAttribute('data-color') === avatarState.hairColor);
-  });
-  
-  // Update eye shape selection
-  document.querySelectorAll(`.avatar-part[data-type="eyes"]`).forEach(part => {
-    part.classList.toggle('selected', part.getAttribute('data-id') === avatarState.eyes);
-  });
-  
-  // Update eye color selection
-  document.querySelectorAll('#eye-colors .color-swatch').forEach(swatch => {
-    swatch.classList.toggle('selected', swatch.getAttribute('data-color') === avatarState.eyeColor);
-  });
-  
-  // Update mouth style selection
-  document.querySelectorAll(`.avatar-part[data-type="mouth"]`).forEach(part => {
-    part.classList.toggle('selected', part.getAttribute('data-id') === avatarState.mouth);
-  });
-  
-  // Update accessory selection
-  document.querySelectorAll(`.avatar-part[data-type="accessory"]`).forEach(part => {
-    part.classList.toggle('selected', part.getAttribute('data-id') === avatarState.accessory);
-  });
-}
-
-function updateAvatarPreview() {
-  // Create a simple SVG avatar
-  const avatarSVG = generateAvatarSVG();
-  
-  // Insert the SVG into the preview container
-  const avatarContainer = document.getElementById('avatar-preview');
-  avatarContainer.innerHTML = avatarSVG;
-}
-
-function generateAvatarSVG() {
-  // Generate SVG string for the avatar
-  const svg = `
-    <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <!-- Face shape -->
-      ${getFaceShape()}
+    // Random avatar button
+    document.getElementById('random-btn').addEventListener('click', () => {
+      // Get random selections for each feature
+      avatar.face = getRandomKey(avatarImages.face);
+      avatar.skin = getRandomSkinColor();
+      avatar.hair = getRandomKey(avatarImages.hair);
+      avatar.hairColor = getRandomHairColor();
+      avatar.eyes = getRandomKey(avatarImages.eyes);
+      avatar.mouth = getRandomKey(avatarImages.mouth);
+      avatar.accessory = getRandomKey(avatarImages.accessory);
       
-      <!-- Hair -->
-      ${getHair()}
+      // Update UI to match random selections
+      updateUIFromState();
       
-      <!-- Eyes -->
-      ${getEyes()}
+      // Update avatar preview
+      updateAvatarPreview();
       
-      <!-- Mouth -->
-      ${getMouth()}
+      // Show success message
+      showToast('Random avatar created!');
+    });
+    
+    // Save avatar button
+    document.getElementById('save-btn').addEventListener('click', () => {
+      // Save avatar state to localStorage
+      localStorage.setItem('savedAvatar', JSON.stringify(avatar));
+      showToast('Avatar saved successfully!');
+    });
+    
+    // Update avatar preview based on current state
+    function updateAvatarPreview() {
+      // Set face with skin color
+      const faceLayer = document.getElementById('face-layer');
+      faceLayer.style.backgroundImage = `url('${avatarImages.face[avatar.face]}')`;
+      faceLayer.style.backgroundColor = avatar.skin;
       
-      <!-- Accessory -->
-      ${getAccessory()}
-    </svg>
-  `;
-  
-  return svg;
-}
-
-function getFaceShape() {
-  // Generate face shape based on current state
-  const faceShape = avatarState.face;
-  const skinColor = avatarState.skinColor;
-  
-  let path = '';
-  
-  switch (faceShape) {
-    case 'round':
-      path = `<circle cx="100" cy="100" r="70" fill="${skinColor}" />`;
-      break;
-    case 'oval':
-      path = `<ellipse cx="100" cy="100" rx="60" ry="80" fill="${skinColor}" />`;
-      break;
-    case 'square':
-      path = `<rect x="40" y="40" width="120" height="120" rx="20" fill="${skinColor}" />`;
-      break;
-    default:
-      path = `<circle cx="100" cy="100" r="70" fill="${skinColor}" />`;
-  }
-  
-  return path;
-}
-
-function getHair() {
-  // Generate hair based on current state
-  const hairStyle = avatarState.hair;
-  const hairColor = avatarState.hairColor;
-  
-  let path = '';
-  
-  switch (hairStyle) {
-    case 'bald':
-      path = '';
-      break;
-    case 'short':
-      path = `
-        <path d="M40,70 C40,30 160,30 160,70" fill="${hairColor}" />
-        <path d="M40,70 C40,50 45,40 30,20 L35,15 C50,30 60,40 100,40 C140,40 150,30 165,15 L170,20 C155,40 160,50 160,70" fill="${hairColor}" />
-      `;
-      break;
-    case 'medium':
-      path = `
-        <path d="M40,70 C40,30 160,30 160,70" fill="${hairColor}" />
-        <path d="M30,120 C20,80 30,60 30,20 L35,15 C50,30 60,40 100,40 C140,40 150,30 165,15 L170,20 C170,60 180,80 170,120" fill="${hairColor}" />
-      `;
-      break;
-    case 'long':
-      path = `
-        <path d="M40,70 C40,30 160,30 160,70" fill="${hairColor}" />
-        <path d="M20,170 C10,100 20,60 20,20 L25,15 C40,30 50,40 100,40 C150,40 160,30 175,15 L180,20 C180,60 190,100 180,170" fill="${hairColor}" />
-      `;
-      break;
-    case 'curly':
-      path = `
-        <path d="M40,70 C40,30 160,30 160,70" fill="${hairColor}" />
-        <path d="M30,150 C10,120 20,80 25,60 C15,50 30,30 40,40 C35,20 55,10 65,30 C75,10 95,20 85,40 C105,25 115,45 95,55 C115,65 105,85 85,80 C95,100 75,110 65,90 C55,110 35,100 40,80 C25,85 15,65 30,60 C20,80 10,120 30,150" fill="${hairColor}" />
-        <path d="M170,150 C190,120 180,80 175,60 C185,50 170,30 160,40 C165,20 145,10 135,30 C125,10 105,20 115,40 C95,25 85,45 105,55 C85,65 95,85 115,80 C105,100 125,110 135,90 C145,110 165,100 160,80 C175,85 185,65 170,60 C180,80 190,120 170,150" fill="${hairColor}" />
-      `;
-      break;
-    default:
-      path = `<path d="M40,70 C40,30 160,30 160,70" fill="${hairColor}" />`;
-  }
-  
-  return path;
-}
-
-function getEyes() {
-  // Generate eyes based on current state
-  const eyeShape = avatarState.eyes;
-  const eyeColor = avatarState.eyeColor;
-  
-  let path = '';
-  
-  switch (eyeShape) {
-    case 'round':
-      path = `
-        <circle cx="70" cy="85" r="10" fill="white" stroke="black" stroke-width="1" />
-        <circle cx="130" cy="85" r="10" fill="white" stroke="black" stroke-width="1" />
-        <circle cx="70" cy="85" r="5" fill="${eyeColor}" />
-        <circle cx="130" cy="85" r="5" fill="${eyeColor}" />
-      `;
-      break;
-    case 'almond':
-      path = `
-        <ellipse cx="70" cy="85" rx="12" ry="8" fill="white" stroke="black" stroke-width="1" />
-        <ellipse cx="130" cy="85" rx="12" ry="8" fill="white" stroke="black" stroke-width="1" />
-        <ellipse cx="70" cy="85" rx="6" ry="4" fill="${eyeColor}" />
-        <ellipse cx="130" cy="85" rx="6" ry="4" fill="${eyeColor}" />
-      `;
-      break;
-    case 'wide':
-      path = `
-        <ellipse cx="70" cy="85" rx="15" ry="10" fill="white" stroke="black" stroke-width="1" />
-        <ellipse cx="130" cy="85" rx="15" ry="10" fill="white" stroke="black" stroke-width="1" />
-        <ellipse cx="70" cy="85" rx="7" ry="5" fill="${eyeColor}" />
-        <ellipse cx="130" cy="85" rx="7" ry="5" fill="${eyeColor}" />
-      `;
-      break;
-    default:
-      path = `
-        <circle cx="70" cy="85" r="10" fill="white" stroke="black" stroke-width="1" />
-        <circle cx="130" cy="85" r="10" fill="white" stroke="black" stroke-width="1" />
-        <circle cx="70" cy="85" r="5" fill="${eyeColor}" />
-        <circle cx="130" cy="85" r="5" fill="${eyeColor}" />
-      `;
-  }
-  
-  return path;
-}
-
-function getMouth() {
-  // Generate mouth based on current state
-  const mouthStyle = avatarState.mouth;
-  
-  let path = '';
-  
-  switch (mouthStyle) {
-    case 'smile':
-      path = `
-        <path d="M70,120 Q100,150 130,120" fill="none" stroke="black" stroke-width="3" />
-      `;
-      break;
-    case 'neutral':
-      path = `
-        <line x1="70" y1="125" x2="130" y2="125" stroke="black" stroke-width="3" />
-      `;
-      break;
-    case 'laugh':
-      path = `
-        <path d="M70,120 Q100,160 130,120" fill="none" stroke="black" stroke-width="3" />
-        <path d="M70,120 Q100,140 130,120" fill="#FF9999" />
-      `;
-      break;
-    default:
-      path = `
-        <path d="M70,120 Q100,140 130,120" fill="none" stroke="black" stroke-width="3" />
-      `;
-  }
-  
-  return path;
-}
-
-function getAccessory() {
-  // Generate accessory based on current state
-  const accessoryType = avatarState.accessory;
-  
-  let path = '';
-  
-  switch (accessoryType) {
-    case 'none':
-      path = '';
-      break;
-    case 'glasses':
-      path = `
-        <circle cx="70" cy="85" r="15" fill="none" stroke="black" stroke-width="2" />
-        <circle cx="130" cy="85" r="15" fill="none" stroke="black" stroke-width="2" />
-        <line x1="85" y1="85" x2="115" y2="85" stroke="black" stroke-width="2" />
-        <line x1="55" y1="85" x2="45" y2="80" stroke="black" stroke-width="2" />
-        <line x1="145" y1="85" x2="155" y2="80" stroke="black" stroke-width="2" />
-      `;
-      break;
-    case 'earrings':
-      path = `
-        <circle cx="35" cy="100" r="5" fill="gold" />
-        <circle cx="165" cy="100" r="5" fill="gold" />
-      `;
-      break;
-    case 'hat':
-      path = `
-        <path d="M40,70 C40,30 160,30 160,70" fill="#555555" />
-        <ellipse cx="100" cy="30" rx="70" ry="20" fill="#555555" />
-      `;
-      break;
-    default:
-      path = '';
-  }
-  
-  return path;
-}
-
-function showToast(message, type = 'success') {
-  // Remove any existing toasts
-  const existingToast = document.querySelector('.toast');
-  if (existingToast) {
-    existingToast.remove();
-  }
-  
-  // Create new toast
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}-toast fade-in`;
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  
-  // Remove toast after 3 seconds
-  setTimeout(() => {
-    toast.classList.remove('fade-in');
-    toast.classList.add('fade-out');
-    setTimeout(() => toast.remove(), 500);
-  }, 3000);
-}
+      // Set hair with hair color
+      const hairLayer = document.getElementById('hair-layer');
+      if (avatar.hair === 'none') {
+        hairLayer.style.backgroundImage = 'none';
+      } else {
+        hairLayer.style.backgroundImage = `url('${avatarImages.hair[avatar.hair]}')`;
+        // For a real app, you would use images that can be colored or apply filters
+        // This is a simplified approach
+        hairLayer.style.filter = getHairColorFilter(avatar.hairColor);
+      }
+      
+      // Set eyes
+      const eyesLayer = document.getElementById('eyes-layer');
+      eyesLayer.style.backgroundImage = `url('${avatarImages.eyes[avatar.eyes]}')`;
+      
+      // Set mouth
+      const mouthLayer = document.getElementById('mouth-layer');
+      mouthLayer.style.backgroundImage = `url('${avatarImages.mouth[avatar.mouth]}')`;
+      
+      // Set accessory
+      const accessoryLayer = document.getElementById('accessory-layer');
+      if (avatar.accessory === 'none') {
+        accessoryLayer.style.backgroundImage = 'none';
+      } else {
+        accessoryLayer.style.backgroundImage = `url('${avatarImages.accessory[avatar.accessory]}')`;
+      }
+    }
+    
+    // Update the UI selections to match current avatar state
+    function updateUIFromState() {
+      // Update face selection
+      document.querySelectorAll(`.option[data-type="face"]`).forEach(option => {
+        option.classList.toggle('selected', option.getAttribute('data-value') === avatar.face);
+      });
+      
+      // Update skin color selection
+      document.querySelectorAll(`.color[data-type="skin"]`).forEach(color => {
+        color.classList.toggle('selected', color.getAttribute('data-value') === avatar.skin);
+      });
+      
+      // Update hair selection
+      document.querySelectorAll(`.option[data-type="hair"]`).forEach(option => {
+        option.classList.toggle('selected', option.getAttribute('data-value') === avatar.hair);
+      });
+      
+      // Update hair color selection
+      document.querySelectorAll(`.color[data-type="hairColor"]`).forEach(color => {
+        color.classList.toggle('selected', color.getAttribute('data-value') === avatar.hairColor);
+      });
+      
+      // Update eyes selection
+      document.querySelectorAll(`.option[data-type="eyes"]`).forEach(option => {
+        option.classList.toggle('selected', option.getAttribute('data-value') === avatar.eyes);
+      });
+      
+      // Update mouth selection
+      document.querySelectorAll(`.option[data-type="mouth"]`).forEach(option => {
+        option.classList.toggle('selected', option.getAttribute('data-value') === avatar.mouth);
+      });
+      
+      // Update accessory selection
+      document.querySelectorAll(`.option[data-type="accessory"]`).forEach(option => {
+        option.classList.toggle('selected', option.getAttribute('data-value') === avatar.accessory);
+      });
+    }
+    
+    // Helper function to get a random key from an object
+    function getRandomKey(obj) {
+      const keys = Object.keys(obj);
+      return keys[Math.floor(Math.random() * keys.length)];
+    }
+    
+    // Helper function to get a random skin color
+    function getRandomSkinColor() {
+      const skinColors = [
+        "#FDE3D5", "#F1C27D", "#E0AC69", "#C68642", "#8D5524", "#5C3518"
+      ];
+      return skinColors[Math.floor(Math.random() * skinColors.length)];
+    }
+    
+    // Helper function to get a random hair color
+    function getRandomHairColor() {
+      const hairColors = [
+        "#090806", "#8D4A43", "#B55239", "#D6C4C2", "#F7F6F2", "#F4D35E"
+      ];
+      return hairColors[Math.floor(Math.random() * hairColors.length)];
+    }
+    
+    // Helper function to create a color filter effect for hair
+    function getHairColorFilter(color) {
+      // This is a simplified approach - for a real app you'd use more sophisticated techniques
+      // or pre-colored assets for hair
+      switch(color) {
+        case "#090806": return "brightness(0.7)"; // Black
+        case "#8D4A43": return "sepia(0.5) hue-rotate(0deg)"; // Brown
+        case "#B55239": return "sepia(0.6) hue-rotate(0deg) saturate(1.5)"; // Auburn
+        case "#D6C4C2": return "sepia(0.2) brightness(1.3)"; // Gray
+        case "#F7F6F2": return "brightness(1.5) contrast(0.8)"; // White/Blonde
+        case "#F4D35E": return "sepia(0.8) hue-rotate(30deg) saturate(1.8)"; // Blonde
+        default: return "none";
+      }
+    }
+    
+    // Show toast message
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
